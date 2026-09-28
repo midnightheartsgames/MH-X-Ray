@@ -40,30 +40,23 @@ bool	CLevel::net_start_client1				()
 
 bool	CLevel::net_start_client2				()
 {
-	if(psNET_direct_connect)
+	connected_to_server = (Server != NULL);
+	if (connected_to_server)
 	{
 		Server->create_direct_client();
+		Connect2Server				();
 	}
 
-	connected_to_server = Connect2Server(*m_caClientOptions);
-	
 	return true;
 }
 
 bool	CLevel::net_start_client3				()
 {
 	if(connected_to_server){
-		LPCSTR					level_name = NULL;
-		if(psNET_direct_connect)
-		{
-			level_name	= ai().get_alife() ? *name() : Server->level_name( Server->GetConnectOptions() ).c_str();
-		}else
-			level_name	= ai().get_alife() ? *name() : net_SessionName	();
+		LPCSTR					level_name = ai().get_alife() ? *name() : Server->level_name( Server->GetConnectOptions() ).c_str();
 
-		// Determine internal level-ID
 		int						level_id = pApp->Level_ID(level_name);
 		if (level_id<0)	{
-			Disconnect			();
 			pApp->LoadEnd		();
 			connected_to_server = FALSE;
 			m_name				= level_name;
@@ -72,7 +65,6 @@ bool	CLevel::net_start_client3				()
 		}
 		pApp->Level_Set			(level_id);
 		m_name					= level_name;
-		// Load level
 		R_ASSERT2				(Load(level_id),"Loading failed.");
 
 	}
@@ -82,54 +74,23 @@ bool	CLevel::net_start_client3				()
 bool	CLevel::net_start_client4				()
 {
 	if(connected_to_server){
-		// Begin spawn
 		g_pGamePersistent->LoadTitle		("st_client_spawning");
 
-		// Send physics to single or multithreaded mode
 		LoadPhysicsGameParams				();
 		ph_world							= xr_new<CPHWorld>();
 		ph_world->Create					();
 
-		// Send network to single or multithreaded mode
-		// *note: release version always has "mt_*" enabled
 		Device.seqFrameMT.Remove			(g_pNetProcessor);
 		Device.seqFrame.Remove				(g_pNetProcessor);
 		if (psDeviceFlags.test(mtNetwork))	Device.seqFrameMT.Add	(g_pNetProcessor,REG_PRIORITY_HIGH	+ 2);
 		else								Device.seqFrame.Add		(g_pNetProcessor,REG_PRIORITY_LOW	- 2);
 
-		if(!psNET_direct_connect)
+		while(!game_configured)
 		{
-			// Waiting for connection/configuration completition
-			CTimer	timer_sync	;	timer_sync.Start	();
-			while	(!net_isCompleted_Connect())	Sleep	(5);
-			Msg		("* connection sync: %d ms", timer_sync.GetElapsed_ms());
-			while	(!net_isCompleted_Sync())	{ ClientReceive(); Sleep(5); }
-		}
-
-		while(!game_configured)			
-		{ 
-			ClientReceive(); 
-			if(Server)
-				Server->Update()	;
-			Sleep(5); 
-		}
-/*
-		if(psNET_direct_connect)
-		{
-			ClientReceive(); 
-			if(Server)
-					Server->Update()	;
+			ClientReceive();
+			Server->Update()	;
 			Sleep(5);
-		}else
-
-			while(!game_configured)			
-			{ 
-				ClientReceive(); 
-				if(Server)
-					Server->Update()	;
-				Sleep(5); 
-			}
-*/
+		}
 		}
 	return true;
 }

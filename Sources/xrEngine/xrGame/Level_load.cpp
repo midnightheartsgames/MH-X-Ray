@@ -22,7 +22,7 @@ BOOL CLevel::Load_GameSpecific_Before()
 	string_path							fn_game;
 	
 	if (GamePersistent().GameType() == GAME_SINGLE && !ai().get_alife() && FS.exist(fn_game,"$level$","level.ai"))
-		ai().load						(net_SessionName());
+		ai().load						(name().c_str());
 
 	if (!ai().get_alife() && ai().get_game_graph() && FS.exist(fn_game, "$level$", "level.game")) {
 		IReader							*stream = FS.r_open		(fn_game);

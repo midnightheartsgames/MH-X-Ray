@@ -296,7 +296,7 @@ void game_cl_GameState::sv_GameEventGen(NET_Packet& P)
 
 void	game_cl_GameState::sv_EventSend(NET_Packet& P)
 {
-	Level().Send(P,net_flags(TRUE,TRUE));
+	Level().Send(P);
 }
 
 bool game_cl_GameState::IR_OnKeyboardPress		(int dik)
@@ -334,7 +334,7 @@ void game_cl_GameState::u_EventGen(NET_Packet& P, u16 type, u16 dest)
 
 void game_cl_GameState::u_EventSend(NET_Packet& P)
 {
-	Level().Send(P,net_flags(TRUE,TRUE));
+	Level().Send(P);
 }
 
 void				game_cl_GameState::OnSwitchPhase			(u32 old_phase, u32 new_phase)

@@ -23,7 +23,6 @@ private:
 		u32										dwTimeDelta;
 		u32										dwTimeGlobal;
 		u32										dwTimeServer;
-		u32										dwTimeServer_Delta;
 	};
 
 	struct DemoHeaderStruct {

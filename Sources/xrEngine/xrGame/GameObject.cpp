@@ -483,7 +483,7 @@ void CGameObject::spawn_supplies()
 
 				NET_Packet					P;
 				A->Spawn_Write				(P,TRUE);
-				Level().Send				(P,net_flags(TRUE));
+				Level().Send				(P);
 				F_entity_Destroy			(A);
 		}
 	}
@@ -633,9 +633,7 @@ float CGameObject::renderable_Ambient	()
 CObject::SavedPosition CGameObject::ps_Element(u32 ID) const
 {
 	VERIFY(ID<ps_Size());
-	inherited::SavedPosition	SP	=	PositionStack[ID];
-	SP.dwTime					+=	Level().timeServer_Delta();
-	return SP;
+	return						PositionStack[ID];
 }
 
 void CGameObject::u_EventGen(NET_Packet& P, u32 type, u32 dest)
@@ -646,9 +644,9 @@ void CGameObject::u_EventGen(NET_Packet& P, u32 type, u32 dest)
 	P.w_u16		(u16(dest&0xffff));
 }
 
-void CGameObject::u_EventSend(NET_Packet& P, u32 dwFlags )
+void CGameObject::u_EventSend(NET_Packet& P)
 {
-	Level().Send(P, dwFlags);
+	Level().Send(P);
 }
 
 #include "bolt.h"

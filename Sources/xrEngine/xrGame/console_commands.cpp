@@ -237,7 +237,7 @@ public:
 				NET_Packet		P;
 				P.w_begin		(M_SWITCH_DISTANCE);
 				P.w_float		(id1);
-				Level().Send	(P,net_flags(TRUE,TRUE));
+				Level().Send	(P);
 			}
 		}
 		else
@@ -421,7 +421,7 @@ public:
 			net_packet.w_begin	(M_SAVE_GAME);
 			net_packet.w_stringZ(S);
 			net_packet.w_u8		(0);
-			Level().Send		(net_packet,net_flags(TRUE));
+			Level().Send		(net_packet);
 		}else{
 			if(!valid_file_name(S)){
 				Msg("invalid file name");
@@ -432,7 +432,7 @@ public:
 			net_packet.w_begin	(M_SAVE_GAME);
 			net_packet.w_stringZ(S);
 			net_packet.w_u8		(1);
-			Level().Send		(net_packet,net_flags(TRUE));
+			Level().Send		(net_packet);
 		}
 #ifdef DEBUG
 		Msg						("Game save overhead  : %f milliseconds",timer.GetElapsed_sec()*1000.f);
@@ -509,7 +509,7 @@ public:
 		NET_Packet					net_packet;
 		net_packet.w_begin			(M_LOAD_GAME);
 		net_packet.w_stringZ		(saved_game);
-		Level().Send				(net_packet,net_flags(TRUE));
+		Level().Send				(net_packet);
 	}
 };
 

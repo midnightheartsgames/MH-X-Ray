@@ -10,7 +10,6 @@ void xrServer::Perform_game_export	()
 	// But it is slightly different view for each "player"
 
 	NET_Packet		P;
-	u32				mode			= net_flags(TRUE,TRUE);
 
 	// Game config (all, info includes _new_ player)
 	csPlayers.Enter		();
@@ -21,7 +20,7 @@ void xrServer::Perform_game_export	()
 		if (!CL->net_Accepted) continue;
 		P.w_begin						(M_SV_CONFIG_GAME);
 		game->net_Export_State			(P,ID);
-		SendTo							(ID,P,mode);
+		SendTo							(ID,P);
 	}
 	csPlayers.Leave		();
 
@@ -31,12 +30,11 @@ void xrServer::Perform_game_export	()
 void xrServer::Export_game_type(IClient* CL)
 {
 	NET_Packet			P;
-	u32					mode = net_flags(TRUE,TRUE);
 	csPlayers.Enter		();
 
 	P.w_begin			(M_SV_CONFIG_NEW_CLIENT);
 	P.w_stringZ			(game->type_name() );
-	SendTo				(CL->ID,P,mode);
+	SendTo				(CL->ID,P);
 
 	csPlayers.Leave		();
 }

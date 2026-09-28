@@ -17,11 +17,7 @@
 
 string128	ErrMsgBoxTemplate	[]	= {
 		"message_box_invalid_pass",
-		"message_box_invalid_host",
-		"message_box_session_full",
-		"message_box_server_reject",
 		"message_box_different_version",
-		"msg_box_kicked_by_server",
 		"msg_box_error_loading"
 };
 
@@ -43,7 +39,6 @@ CMainMenu::CMainMenu	()
 	m_deactivated_frame				= 0;	
 
 	m_NeedErrDialog					= ErrNoError;
-	m_start_time					= 0;
 
 	g_btnHint						= xr_new<CUIButtonHint>();
 
@@ -434,18 +429,6 @@ void CMainMenu::DestroyInternal(bool bForce)
 		xr_delete		(m_startDialog);
 }
 
-void CMainMenu::OnSessionTerminate(LPCSTR reason)
-{
-	if ( m_NeedErrDialog == SessionTerminate && (Device.dwTimeGlobal - m_start_time) < 8000 )
-		return;
-
-	m_start_time = Device.dwTimeGlobal;
-	string1024 Text;
-	strcpy_s(Text, sizeof(Text), "Client disconnected. ");
-	strcat_s(Text,sizeof(Text),reason);
-	m_pMB_ErrDlgs[SessionTerminate]->SetText(Text);
-	SetErrorDialog(CMainMenu::SessionTerminate);
-}
 
 void	CMainMenu::OnLoadError(LPCSTR module)
 {

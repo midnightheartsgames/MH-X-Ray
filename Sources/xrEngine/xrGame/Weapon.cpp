@@ -906,7 +906,7 @@ void CWeapon::SpawnAmmo(u32 boxCurr, LPCSTR ammoSect, u32 ParentID)
 			l_pA->a_elapsed			= (u16)(boxCurr > l_pA->m_boxSize ? l_pA->m_boxSize : boxCurr);
 			NET_Packet				P;
 			D->Spawn_Write			(P, TRUE);
-			Level().Send			(P,net_flags(TRUE));
+			Level().Send			(P);
 
 			if(boxCurr > l_pA->m_boxSize) 
 				boxCurr				-= l_pA->m_boxSize;
@@ -1248,7 +1248,7 @@ void CWeapon::SwitchState(u32 S)
 		P.w_u8			(u8(m_ammoType& 0xff));
 		P.w_u8			(u8(iAmmoElapsed & 0xff));
 		P.w_u8			(u8(m_set_next_ammoType_on_reload & 0xff));
-		CHudItem::object().u_EventSend		(P, net_flags(TRUE, TRUE, FALSE, TRUE));
+		CHudItem::object().u_EventSend		(P);
 	}
 }
 

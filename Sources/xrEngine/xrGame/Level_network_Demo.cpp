@@ -397,7 +397,7 @@ void						CLevel::Demo_Update				()
 
 void						CLevel::Demo_StartFrame			()
 {
-	if (!IsDemoSave() || !net_IsSyncronised()) return;
+	if (!IsDemoSave()) return;
 
 	DemoCS.Enter();
 
@@ -405,7 +405,6 @@ void						CLevel::Demo_StartFrame			()
 	CurFrameTime.dwTimeDelta = Device.dwTimeDelta;
 	CurFrameTime.dwTimeGlobal = Device.dwTimeGlobal;
 	CurFrameTime.dwTimeServer = Level().timeServer();
-	CurFrameTime.dwTimeServer_Delta = Level().timeServer_Delta();
 	CurFrameTime.fTimeDelta = Device.fTimeDelta;
 	CurFrameTime.fTimeGlobal= Device.fTimeGlobal;
 

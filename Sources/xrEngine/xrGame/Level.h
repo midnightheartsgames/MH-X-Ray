@@ -121,10 +121,6 @@ public:
 	bool						In_NetCorrectionPrediction	() {return m_bIn_CrPr;};
 
 	virtual void				OnMessage				(void* data, u32 size);
-	virtual void				OnInvalidHost			();
-	virtual void				OnInvalidPassword		();
-	virtual void				OnSessionFull			();
-	virtual void				OnConnectRejected		();
 private:
 	BOOL						m_bNeed_CrPr;
 	u32							m_dwNumSteps;
@@ -154,12 +150,8 @@ private:
 	void						UpdateDeltaUpd					( u32 LastTime );
 	void						BlockCheatLoad					()				;
 
-	BOOL						Connect2Server					(LPCSTR options);
-private:
-	bool						m_bConnectResultReceived;
-	bool						m_bConnectResult;
-	xr_string					m_sConnectResult;
-public:	
+	void						Connect2Server					();
+public:
 	void						OnBuildVersionChallenge			();
 	void						OnConnectResult					(NET_Packet* P);
 public:
@@ -192,7 +184,6 @@ protected:
 
 	bool	xr_stdcall			net_start1				();
 	bool	xr_stdcall			net_start2				();
-	bool	xr_stdcall			net_start3				();
 	bool	xr_stdcall			net_start4				();
 	bool	xr_stdcall			net_start5				();
 	bool	xr_stdcall			net_start6				();
@@ -259,7 +250,7 @@ public:
 	void						ClientSend				();
 	void						ClientSave				();
 			u32					Objects_net_Save		(NET_Packet* _Packet, u32 start, u32 count);
-	virtual	void				Send					(NET_Packet& P, u32 dwFlags=DPNSEND_GUARANTEED, u32 dwTimeout=0);
+	void						Send					(NET_Packet& P);
 	
 	void						g_cl_Spawn				(LPCSTR name, u8 rp, u16 flags, Fvector pos);	// only ask server
 	void						g_sv_Spawn				(CSE_Abstract* E);					// server reply/command spawning
@@ -336,7 +327,6 @@ public:
 
 public:
 			void			remove_objects				();
-	virtual void			OnSessionTerminate			(LPCSTR reason);
 
 	DECLARE_SCRIPT_REGISTER_FUNCTION
 };

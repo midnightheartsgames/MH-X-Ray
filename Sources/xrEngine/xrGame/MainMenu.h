@@ -44,20 +44,15 @@ public:
 	enum	EErrorDlg 
 	{
 		ErrInvalidPassword,
-		ErrInvalidHost,
-		ErrSessionFull,
-		ErrServerReject,
 		ErrDifferentVersion,
-		SessionTerminate,
 		LoadingError,
 		ErrMax,
 		ErrNoError = ErrMax,
 	};
 
 protected:
-	EErrorDlg		m_NeedErrDialog;	
-	u32				m_start_time;
-	
+	EErrorDlg		m_NeedErrDialog;
+
 	xr_vector<CUIMessageBoxEx*>	m_pMB_ErrDlgs;
 
 public:
@@ -98,9 +93,7 @@ public:
 	void			UnregisterPPDraw				(CUIWindow* w);
 
 	void			SetErrorDialog					(EErrorDlg ErrDlg);
-	EErrorDlg		GetErrorDialogType				() const { return m_NeedErrDialog; } ;
 	void			CheckForErrorDlg				();
-	void			OnSessionTerminate				(LPCSTR reason);
 	void			OnLoadError						(LPCSTR module);
 	void			SetNeedVidRestart				();
 	virtual void	OnDeviceReset					();

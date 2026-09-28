@@ -99,7 +99,6 @@ void CLevel::net_Stop		()
 	remove_objects				();
 	
 	IGame_Level::net_Stop		();
-	IPureClient::Disconnect		();
 
 	if (Server) {
 		Server->Disconnect		();
@@ -145,7 +144,7 @@ void CLevel::ClientSend()
 				{
 					if (OnServer())
 					{
-						if (net_IsSyncronised() && IsDemoSave()) 
+						if (IsDemoSave())
 						{
 							DemoCS.Enter();
 							Demo_StoreData(P.B.data, P.B.count, DATA_CLIENT_PACKET);
@@ -153,17 +152,11 @@ void CLevel::ClientSend()
 						}						
 					}
 					else
-						Send	(P, net_flags(FALSE));
+						Send	(P);
 				}				
 			}			
 		}		
 	};
-	if (OnClient()) 
-	{
-		Flush_Send_Buffer();
-		return;
-	}
-	//-------------------------------------------------
 	while (1)
 	{
 		P.w_begin						(M_UPDATE);
@@ -172,7 +165,7 @@ void CLevel::ClientSend()
 		if (P.B.count>2)
 		{
 			Device.Statistic->TEST3.Begin();
-				Send	(P, net_flags(FALSE));
+				Send	(P);
 			Device.Statistic->TEST3.End();
 		}else
 			break;
@@ -222,35 +215,18 @@ void CLevel::ClientSave	()
 		start		= Objects_net_Save(&P, start, max_objects_size_in_save);
 
 		if (P.B.count>2)
-			Send	(P, net_flags(FALSE));
+			Send	(P);
 		else
 			break;
 	}
 }
 
-extern		float		phTimefactor;
-extern		BOOL		g_SV_Disable_Auth_Check;
-
-void CLevel::Send		(NET_Packet& P, u32 dwFlags, u32 dwTimeout)
+void CLevel::Send		(NET_Packet& P)
 {
 	if (IsDemoPlay() && m_bDemoStarted) return;
-	// optimize the case when server located in our memory
-	if(psNET_direct_connect){
-		ClientID	_clid;
-		_clid.set	(1);
-		Server->OnMessage	(P,	_clid );
-	}else
-	if (Server && game_configured && OnServer() )
-	{
-		Server->OnMessage	(P,Game().local_svdpnid	);
-	}else											
-		IPureClient::Send	(P,dwFlags,dwTimeout	);
-
-	if (g_pGameLevel && Level().game && GameID() != GAME_SINGLE && !g_SV_Disable_Auth_Check)		{
-		// anti-cheat
-		phTimefactor		= 1.f					;
-		psDeviceFlags.set	(rsConstantFPS,FALSE)	;	
-	}
+	ClientID	_clid;
+	_clid.set	(1);
+	Server->OnMessage	(P,	_clid );
 }
 
 void CLevel::net_Update	()
@@ -279,67 +255,12 @@ struct _NetworkProcessor	: public pureFrame
 
 pureFrame*	g_pNetProcessor	= &NET_processor;
 
-const int ConnectionTimeOut = 60000; //1 min
-
-BOOL			CLevel::Connect2Server				(LPCSTR options)
+void			CLevel::Connect2Server				()
 {
-	NET_Packet					P;
-	m_bConnectResultReceived	= false	;
-	m_bConnectResult			= true	;
-	if (!Connect(options))		return	FALSE;
-	//---------------------------------------------------------------------------
-	if(psNET_direct_connect) m_bConnectResultReceived = true;
-	u32 EndTime = GetTickCount() + ConnectionTimeOut;
-	while	(!m_bConnectResultReceived)		{ 
-		ClientReceive	();
-		Sleep			(5); 
-		if(Server)
-			Server->Update()	;
-		//-----------------------------------------
-		u32 CurTime = GetTickCount();
-		if (CurTime > EndTime)
-		{
-			NET_Packet	P;
-			P.B.count = 0;
-			P.r_pos = 0;
-
-			P.w_u8(0);
-			P.w_u8(0);
-			P.w_stringZ("Data verification failed. Cheater? [1]");
-
-			OnConnectResult(&P);			
-		}
-		if (net_isFails_Connect())
-		{
-			OnConnectRejected	();	
-			Disconnect		()	;
-			return	FALSE;
-		}
-		//-----------------------------------------
-	}
-	Msg							("%c client : connection %s - <%s>", m_bConnectResult ?'*':'!', m_bConnectResult ? "accepted" : "rejected", m_sConnectResult.c_str());
-	if		(!m_bConnectResult) 
-	{
-		OnConnectRejected	();	
-		Disconnect		()	;
-		return FALSE		;
-	};
-
-	
-	if(psNET_direct_connect)
-		net_Syncronised = TRUE;
-	else
-		net_Syncronize	();
-
-	while (!net_IsSyncronised()) {
-	};
-
-	//---------------------------------------------------------------------------
+	NET_Packet	P;
 	P.w_begin	(M_CLIENT_REQUEST_CONNECTION_DATA);
-	Send		(P, net_flags(TRUE, TRUE, TRUE, TRUE));
-	//---------------------------------------------------------------------------
-	return TRUE;
-};
+	Send		(P);
+}
 
 void			CLevel::OnBuildVersionChallenge		()
 {
@@ -347,20 +268,17 @@ void			CLevel::OnBuildVersionChallenge		()
 	P.w_begin				(M_CL_AUTH);
 	u64 auth = FS.auth_get();
 	P.w_u64					(auth);
-	Send					(P, net_flags(TRUE, TRUE, TRUE, TRUE));
+	Send					(P);
 };
 
 void			CLevel::OnConnectResult				(NET_Packet*	P)
 {
-	// multiple results can be sent during connection they should be "AND-ed"
-	m_bConnectResultReceived	= true;
 	u8	result					= P->r_u8();
 	u8  res1					= P->r_u8();
-	string128 ResultStr			;	
+	string128 ResultStr			;
 	P->r_stringZ(ResultStr)		;
-	if (!result)				
+	if (!result)
 	{
-		m_bConnectResult	= false			;	
 		switch (res1)
 		{
 		case 0:
@@ -371,30 +289,25 @@ void			CLevel::OnConnectResult				(NET_Packet*	P)
 		case 2:
 			{
 				MainMenu()->SetErrorDialog(CMainMenu::ErrInvalidPassword);
-			}break;		
+			}break;
 		}
-	};	
-	m_sConnectResult			= ResultStr;
-	
+	};
+
 	if (IsDemoSave())
 	{
-//		P->r_stringZ(m_sDemoHeader.LevelName);
-//		P->r_stringZ(m_sDemoHeader.GameType);
 		m_sDemoHeader.bServerClient = P->r_u8();
 		P->r_stringZ(m_sDemoHeader.ServerOptions);
-		//-----------------------------------------
 		FILE* fTDemo = fopen(m_sDemoName, "ab");
 		if (fTDemo)
 		{
 			fwrite(&m_sDemoHeader.bServerClient, 32, 1, fTDemo);
-			
+
 			DWORD OptLen = m_sDemoHeader.ServerOptions.size();
 			fwrite(&OptLen, 4, 1, fTDemo);
 			fwrite(*m_sDemoHeader.ServerOptions, OptLen, 1, fTDemo);
 			fclose(fTDemo);
 		};
-		//-----------------------------------------
-	};	
+	};
 };
 
 void			CLevel::ClearAllObjects				()
@@ -457,34 +370,6 @@ void			CLevel::ClearAllObjects				()
 #endif
 	};
 	ProcessGameEvents();
-};
-
-void				CLevel::OnInvalidHost			()
-{
-	IPureClient::OnInvalidHost();
-	if (MainMenu()->GetErrorDialogType() == CMainMenu::ErrNoError)
-		MainMenu()->SetErrorDialog(CMainMenu::ErrInvalidHost);
-};
-
-void				CLevel::OnInvalidPassword		()
-{
-	IPureClient::OnInvalidPassword();
-	MainMenu()->SetErrorDialog(CMainMenu::ErrInvalidPassword);
-};
-
-void				CLevel::OnSessionFull			()
-{
-	IPureClient::OnSessionFull();
-	if (MainMenu()->GetErrorDialogType() == CMainMenu::ErrNoError)
-		MainMenu()->SetErrorDialog(CMainMenu::ErrSessionFull);
-}
-
-void				CLevel::OnConnectRejected		()
-{
-	IPureClient::OnConnectRejected();
-
-//	if (MainMenu()->GetErrorDialogType() != CMainMenu::ErrNoError)
-//		MainMenu()->SetErrorDialog(CMainMenu::ErrServerReject);
 };
 
 void				CLevel::net_OnChangeSelfName			(NET_Packet* P)

@@ -67,7 +67,6 @@
     <ClCompile>
       <AdditionalIncludeDirectories>
         $(SolutionDir)\Sources\Externals\Boost\;
-        $(SolutionDir)\Sources\Externals\DXSDK_Aug2007\Include\;
         $(SolutionDir)\Sources\Externals\DXSDK_Jun2010\Include\;
         $(SolutionDir)\Sources\Externals\Xiph\Sources\ogg\include\;
         $(SolutionDir)\Sources\Externals\Xiph\Sources\theora\include\;
@@ -79,7 +78,6 @@
     <Link>
       <AdditionalLibraryDirectories>
         $(SolutionDir)\Output\Libraries\;
-        $(SolutionDir)\Sources\Externals\DXSDK_Aug2007\Lib\;
         $(SolutionDir)\Sources\Externals\DXSDK_Jun2010\Lib\;
         $(SolutionDir)\Sources\Externals\Xiph\Libraries\
       </AdditionalLibraryDirectories>
@@ -494,7 +492,6 @@
       <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="resources\splash.bmp" />
-    <None Include="ClientServer.txt" />
     <None Include="Effects description.txt" />
     <None Include="features.txt" />
     <None Include="TODO.txt" />

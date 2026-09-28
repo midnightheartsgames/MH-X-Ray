@@ -19,7 +19,6 @@ void xrServer::Process_event	(NET_Packet& P, ClientID sender)
 	u32			timestamp;
 	u16			type;
 	u16			destination;
-	u32			MODE			= net_flags(TRUE,TRUE);
 
 	// correct timestamp with server-unique-time (note: direct message correction)
 	P.r_u32		(timestamp	);
@@ -57,13 +56,13 @@ void xrServer::Process_event	(NET_Packet& P, ClientID sender)
 	case GEG_PLAYER_ITEM2RUCK:
 	case GE_GRENADE_EXPLODE:
 		{
-		SendBroadcast			(BroadcastCID,P,MODE);
+		SendBroadcast			(BroadcastCID,P);
 		}break;
 	case GE_INV_ACTION:
 		{
 			xrClientData* CL		= ID_to_client(sender);
 			if (CL)	CL->net_Ready	= TRUE;
-			if (SV_Client) SendTo(SV_Client->ID, P, net_flags(TRUE, TRUE));
+			if (SV_Client) SendTo(SV_Client->ID, P);
 		}break;
 	case GE_RESPAWN:
 		{
@@ -116,7 +115,7 @@ void xrServer::Process_event	(NET_Packet& P, ClientID sender)
 			R_ASSERT			(c_from == c_parent);						// assure client ownership of event
 
 			// Signal to everyone (including sender)
-			SendBroadcast		(BroadcastCID,P,MODE);
+			SendBroadcast		(BroadcastCID,P);
 
 			// Perfrom real destroy
 			entity_Destroy		(e_entity	);
@@ -204,7 +203,7 @@ void xrServer::Process_event	(NET_Packet& P, ClientID sender)
 				P.w_clientID		(c_src->ID);
 			}
 
-			SendBroadcast			(BroadcastCID,P,MODE);
+			SendBroadcast			(BroadcastCID,P);
 
 			//////////////////////////////////////////////////////////////////////////
 			// 
@@ -214,7 +213,7 @@ void xrServer::Process_event	(NET_Packet& P, ClientID sender)
 				P.w_u16				(GE_KILL_SOMEONE);
 				P.w_u16				(id_src);
 				P.w_u16				(destination);
-				SendTo				(c_src->ID, P, net_flags(TRUE, TRUE));
+				SendTo				(c_src->ID, P);
 			}
 			//////////////////////////////////////////////////////////////////////////
 
@@ -225,11 +224,11 @@ void xrServer::Process_event	(NET_Packet& P, ClientID sender)
 	case GE_ADDON_DETACH:
 	case GE_CHANGE_POS:
 		{			
-			SendTo(SV_Client->ID, P, net_flags(TRUE, TRUE));
+			SendTo(SV_Client->ID, P);
 		}break;
 	case GEG_PLAYER_WEAPON_HIDE_STATE:
 		{
-			SendTo		(SV_Client->ID, P, net_flags(TRUE, TRUE));
+			SendTo		(SV_Client->ID, P);
 
 #	ifdef SLOW_VERIFY_ENTITIES
 			VERIFY					(verify_entities());
@@ -238,7 +237,7 @@ void xrServer::Process_event	(NET_Packet& P, ClientID sender)
 	case GEG_PLAYER_ACTIVATE_SLOT:
 	case GEG_PLAYER_ITEM_EAT:
 		{
-			SendTo(SV_Client->ID, P, net_flags(TRUE, TRUE));
+			SendTo(SV_Client->ID, P);
 #	ifdef SLOW_VERIFY_ENTITIES
 			VERIFY					(verify_entities());
 #	endif

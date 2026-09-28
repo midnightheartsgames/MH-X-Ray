@@ -67,7 +67,6 @@
     <ClCompile>
       <AdditionalIncludeDirectories>
         $(SolutionDir)\Sources\Externals\Boost\;
-        $(SolutionDir)\Sources\Externals\DXSDK_Aug2007\Include\;
         $(SolutionDir)\Sources\Externals\Loki\;
         $(SolutionDir)\Sources\xrCore\;
         $(SolutionDir)\Sources\xrLua\LuaJIT\src\;
@@ -76,8 +75,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>
-        $(SolutionDir)\Output\Libraries\;
-        $(SolutionDir)\Sources\Externals\DXSDK_Aug2007\Lib\
+        $(SolutionDir)\Output\Libraries\
       </AdditionalLibraryDirectories>
       <ImportLibrary>$(SolutionDir)\Output\Libraries\$(ProjectName).lib</ImportLibrary>
     </Link>
@@ -3889,7 +3887,6 @@
     <ClCompile Include="xr_time.cpp" />
     <ClCompile Include="game_sv_single.cpp" />
     <ClCompile Include="xrServer_CL_connect.cpp" />
-    <ClCompile Include="xrServer_CL_disconnect.cpp" />
     <ClCompile Include="xrServer_Connect.cpp" />
     <ClCompile Include="xrServer_Disconnect.cpp" />
     <ClCompile Include="xrServer_Factory.cpp" />

@@ -63,7 +63,6 @@
   <ItemDefinitionGroup Condition="'$(Platform)'=='Win32'">
     <ClCompile>
       <AdditionalIncludeDirectories>
-        $(SolutionDir)\Sources\Externals\DXSDK_Aug2007\Include\;
         $(SolutionDir)\Sources\Externals\DXSDK_Jun2010\Include\;
         $(SolutionDir)\Sources\xrCore\
       </AdditionalIncludeDirectories>
@@ -71,7 +70,6 @@
     <Link>
       <AdditionalLibraryDirectories>
         $(SolutionDir)\Output\Libraries\;
-        $(SolutionDir)\Sources\Externals\DXSDK_Aug2007\Lib\;
         $(SolutionDir)\Sources\Externals\DXSDK_Jun2010\Lib\
       </AdditionalLibraryDirectories>
       <ImportLibrary>$(SolutionDir)\Output\Libraries\$(ProjectName).lib</ImportLibrary>

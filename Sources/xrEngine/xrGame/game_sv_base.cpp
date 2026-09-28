@@ -539,18 +539,13 @@ void game_sv_GameState::u_EventGen(NET_Packet& P, u16 type, u16 dest)
 	P.w_u16		(dest);
 }
 
-void game_sv_GameState::u_EventSend(NET_Packet& P, u32 dwFlags)
+void game_sv_GameState::u_EventSend(NET_Packet& P)
 {
-	m_server->SendBroadcast(BroadcastCID,P,dwFlags);
+	m_server->SendBroadcast(BroadcastCID,P);
 }
 
 void game_sv_GameState::Update		()
 {
-	for (u32 it=0; it<m_server->client_Count(); ++it) {
-		xrClientData*	C			= (xrClientData*)	m_server->client_Get(it);
-		C->ps->ping					= u16(C->stats.getPing());
-	}
-	
 	if (Level().game) {
 		CScriptProcess				*script_process = ai().script_engine().script_process(ScriptEngine::eScriptProcessorGame);
 		if (script_process)
@@ -663,7 +658,7 @@ void game_sv_GameState::OnEvent (NET_Packet &tNetPacket, u16 type, u32 time, Cli
 			}
 
 			OnHit(id_src, id_dest, tNetPacket);
-			m_server->SendBroadcast		(BroadcastCID,tNetPacket,net_flags(TRUE,TRUE));
+			m_server->SendBroadcast		(BroadcastCID,tNetPacket);
 		}break;
 	case GAME_EVENT_CREATE_CLIENT:
 		{

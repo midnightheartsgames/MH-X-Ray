@@ -35,10 +35,6 @@ public:
 	
 	game_PlayerState*		ps;
 	struct{
-		u8						m_maxPingWarnings;
-		u32						m_dwLastMaxPingWarningTime;
-	}m_ping_warn;
-	struct{
 		BOOL					m_has_admin_rights;
 		u32						m_dwLoginTime;
 	}m_admin_rights;
@@ -80,7 +76,7 @@ private:
 	xr_deque<DelayedPacket>		m_aDelayedPackets;
 	void						ProceedDelayedPackets	();
 	void						AddDelayedPacket		(NET_Packet& Packet, ClientID Sender);
-	u32							OnDelayedMessage		(NET_Packet& P, ClientID sender);			// Non-Zero means broadcasting with "flags" as returned
+	void						OnDelayedMessage		(NET_Packet& P, ClientID sender);
 
 	void						SendUpdatesToAll		();
 private:
@@ -100,9 +96,6 @@ private:
 private:
 	id_generator_type		m_tID_Generator;
 
-protected:
-	void					Server_Client_Check				(IClient* CL);
-	void					PerformCheckClientsForMaxPing	();
 public:
 	game_sv_GameState*		game;
 
@@ -127,7 +120,7 @@ public:
 	void					Perform_connect_spawn	(CSE_Abstract* E, xrClientData* to, NET_Packet& P);
 	void					Perform_transfer		(NET_Packet &PR, NET_Packet &PT, CSE_Abstract* what, CSE_Abstract* from, CSE_Abstract* to);
 	void					Perform_reject			(CSE_Abstract* what, CSE_Abstract* from, int delta);
-	void					Perform_destroy			(CSE_Abstract* tpSE_Abstract, u32 mode);
+	void					Perform_destroy			(CSE_Abstract* tpSE_Abstract);
 
 	CSE_Abstract*			Process_spawn			(NET_Packet& P, ClientID sender, BOOL bSpawnWithClientsMainEntityAsParent=FALSE, CSE_Abstract* tpExistedEntity=0);
 	void					Process_update			(NET_Packet& P, ClientID sender);
@@ -160,17 +153,12 @@ public:
 	xrServer				();
 	virtual ~xrServer		();
 
-	// extended functionality
-	virtual u32				OnMessage			(NET_Packet& P, ClientID sender);	// Non-Zero means broadcasting with "flags" as returned
-	virtual void			OnCL_Connected		(IClient* CL);
-	virtual void			OnCL_Disconnected	(IClient* CL);
-	virtual bool			OnCL_QueryHost		();
-	virtual void			SendTo_LL			(ClientID ID, void* data, u32 size, u32 dwFlags=DPNSEND_GUARANTEED, u32 dwTimeout=0);
+	void					OnMessage			(NET_Packet& P, ClientID sender);
+	void					OnCL_Connected		(IClient* CL);
+	virtual void			SendTo_LL			(ClientID ID, void* data, u32 size);
 
-	virtual IClient*		client_Create		();								// create client info
-	virtual void			client_Replicate	();								// replicate current state to client
-	virtual IClient*		client_Find_Get		(ClientID ID);					// Find earlier disconnected client
-	virtual void			client_Destroy		(IClient* C);					// destroy client info
+	IClient*				client_Create		();
+	void					client_Destroy		(IClient* C);
 
 	// utilities
 	CSE_Abstract*			entity_Create		(LPCSTR name);
@@ -181,7 +169,7 @@ public:
 	IC void					clients_Lock		()			{	csPlayers.Enter();	}
 	IC void					clients_Unlock		()			{   csPlayers.Leave();	}
 
-	xrClientData*			ID_to_client		(ClientID ID, bool ScanAll = false ) { return (xrClientData*)(IPureServer::ID_to_client( ID, ScanAll)); }
+	xrClientData*			ID_to_client		(ClientID ID) { return (xrClientData*)(IPureServer::ID_to_client( ID )); }
 	CSE_Abstract*			ID_to_entity		(u16 ID);
 
 	// main
@@ -196,8 +184,6 @@ public:
 
 	void					create_direct_client();
 
-	virtual void			Assign_ServerType	( string512& res ) {};
-	virtual bool			HasPassword			()	{ return false; }
 	virtual bool			HasProtected		()	{ return false; }
 public:
 	xr_string				ent_name_safe		(u16 eid);

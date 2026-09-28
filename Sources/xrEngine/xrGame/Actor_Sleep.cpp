@@ -38,7 +38,7 @@ void CActor::UpdateSleep()
 			NET_Packet		P;
 			P.w_begin		(M_SWITCH_DISTANCE);
 			P.w_float		(ONLINE_RADIUS);
-			Level().Send	(P,net_flags(TRUE,TRUE));
+			Level().Send	(P);
 		}
 
 		m_pSleepEffectorPP->m_eSleepState = CSleepEffectorPP::SLEEPING;

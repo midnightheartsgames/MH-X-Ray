@@ -48,7 +48,7 @@ void xrServer::Perform_connect_spawn(CSE_Abstract* E, xrClientData* CL, NET_Pack
 	}
 	//-----------------------------------------------------
 	E->s_flags			= save;
-	SendTo				(CL->ID,P,net_flags(TRUE,TRUE));
+	SendTo				(CL->ID,P);
 	E->net_Processed	= TRUE;
 }
 
@@ -57,22 +57,18 @@ void xrServer::SendConnectionData(IClient* _CL)
 	g_perform_spawn_ids.clear_not_free();
 	xrClientData*	CL				= (xrClientData*)_CL;
 	NET_Packet		P;
-	u32			mode				= net_flags(TRUE,TRUE);
-	// Replicate current entities on to this client
 	xrS_entities::iterator	I=entities.begin(),E=entities.end();
 	for (; I!=E; ++I)						I->second->net_Processed	= FALSE;
 	for (I=entities.begin(); I!=E; ++I)		Perform_connect_spawn		(I->second,CL,P);
 
-	// Send "finished" signal
 	P.w_begin						(M_SV_CONFIG_FINISHED);
-	SendTo							(CL->ID,P,mode);
+	SendTo							(CL->ID,P);
 };
 
 void xrServer::OnCL_Connected		(IClient* _CL)
 {
 	xrClientData*	CL				= (xrClientData*)_CL;
 	CL->net_Accepted = TRUE;
-///	Server_Client_Check(CL); 
 
 	csPlayers.Enter					();
 
@@ -80,7 +76,6 @@ void xrServer::OnCL_Connected		(IClient* _CL)
 	Perform_game_export();
 	SendConnectionData(CL);
 
-	//
 	NET_Packet P;
 	P.B.count = 0;
 	P.w_clientID(CL->ID);
@@ -111,20 +106,13 @@ void	xrServer::SendConnectResult(IClient* CL, u8 res, u8 res1, char* ResultStr)
 
 BOOL	g_SV_Disable_Auth_Check = FALSE;
 
-bool xrServer::NeedToCheckClient_BuildVersion		(IClient* CL)	
+bool xrServer::NeedToCheckClient_BuildVersion		(IClient* CL)
 {
-//#ifdef DEBUG
-	//return false; 
-//#else
-
 	if (g_SV_Disable_Auth_Check) return false;
-	CL->flags.bVerified = FALSE;
 	NET_Packet	P;
 	P.w_begin	(M_AUTH_CHALLENGE);
 	SendTo		(CL->ID, P);
 	return true;
-
-//#endif
 };
 
 void xrServer::OnBuildVersionRespond				( IClient* CL, NET_Packet& P )
@@ -171,6 +159,5 @@ void xrServer::OnBuildVersionRespond				( IClient* CL, NET_Packet& P )
 
 void xrServer::Check_BuildVersion_Success			( IClient* CL )
 {
-	CL->flags.bVerified = TRUE;
 	SendConnectResult(CL, 1, 0, "All Ok");
 };

@@ -884,7 +884,6 @@
     <None Include="resources\splash.bmp">
       <Filter>General\Resources</Filter>
     </None>
-    <None Include="ClientServer.txt" />
     <None Include="Effects description.txt" />
     <None Include="features.txt" />
     <None Include="TODO.txt" />

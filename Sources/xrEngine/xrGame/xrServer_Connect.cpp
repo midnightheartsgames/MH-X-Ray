@@ -52,13 +52,13 @@ xrServer::EConnect xrServer::Connect(shared_str &session_name)
 
 IClient* xrServer::new_client( SClientConnectData* cl_data )
 {
-	IClient* CL		= client_Find_Get( cl_data->clientID );
-	VERIFY( CL );
-	
-	// copy entity
+	IClient* CL		= client_Create();
 	CL->ID			= cl_data->clientID;
-	CL->process_id	= cl_data->process_id;
-	
+
+	csPlayers.Enter			();
+	net_Players.push_back	( CL );
+	csPlayers.Leave			();
+
 	string64 new_name;
 	strcpy_s( new_name, cl_data->name );
 	CL->name._set( new_name );
@@ -69,7 +69,6 @@ IClient* xrServer::new_client( SClientConnectData* cl_data )
 		game->NewPlayerName_Replace( CL, new_name );
 	}
 	CL->name._set( new_name );
-	CL->pass._set( cl_data->pass );
 
 	NET_Packet		P;
 	P.B.count		= 0;
@@ -85,30 +84,11 @@ IClient* xrServer::new_client( SClientConnectData* cl_data )
 
 void xrServer::AttachNewClient			(IClient* CL)
 {
-	MSYS_CONFIG	msgConfig;
-	msgConfig.sign1 = 0x12071980;
-	msgConfig.sign2 = 0x26111975;
-
-
-	if(psNET_direct_connect)  //single_game
-	{
-        SV_Client			= CL;
-		CL->flags.bLocal	= 1;
-		SendTo_LL( SV_Client->ID, &msgConfig, sizeof(msgConfig), net_flags(TRUE,TRUE,TRUE,TRUE) );
-	}
-	else
-	{
-		SendTo_LL				(CL->ID,&msgConfig,sizeof(msgConfig), net_flags(TRUE, TRUE, TRUE, TRUE));
-		Server_Client_Check		(CL); 
-	}
+	SV_Client			= CL;
+	CL->flags.bLocal	= 1;
 
 	if (!NeedToCheckClient_BuildVersion(CL))
 		Check_BuildVersion_Success(CL);
-
-	//xrClientData * CL_D=(xrClientData*)(CL); 
-	//ip_address				ClAddress;
-	//GetClientAddress		(CL->ID, ClAddress);
-	CL->m_guid[0]=0;
 }
 
 
