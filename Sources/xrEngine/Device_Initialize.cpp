@@ -32,7 +32,7 @@ void CRenderDevice::Initialize()
         AdjustWindowRect( &rc, m_dwWindowStyle, FALSE );
 
         // Create the render window
-		m_hWnd = CreateWindow( wndclass, "X-Ray Engine", m_dwWindowStyle,
+		m_hWnd = CreateWindow( wndclass, "Midnight X-Ray", m_dwWindowStyle,
                                /*rc.left, rc.top, */CW_USEDEFAULT, CW_USEDEFAULT,
                                (rc.right-rc.left), (rc.bottom-rc.top), 0L,
                                0, hInstance, 0L );

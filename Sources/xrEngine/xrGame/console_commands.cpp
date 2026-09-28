@@ -1399,8 +1399,8 @@ void CCC_RegisterCommands()
 
 #ifdef DEBUG
 	CMD4(CCC_Float,				"hud_fov",				&psHUD_FOV,		0.1f,	1.0f);
-	CMD4(CCC_Float,				"fov",					&g_fov,			5.0f,	180.0f);
-#endif // DEBUG
+#endif
+	CMD4(CCC_Float,				"fov",					&g_fov,			55.0f,	120.0f);
 
 	// Demo
 	CMD1(CCC_DemoPlay,			"demo_play"				);
