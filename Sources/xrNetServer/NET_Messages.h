@@ -15,9 +15,8 @@ IC u32	net_flags	(BOOL bReliable=FALSE, BOOL bSequental=TRUE, BOOL bHighPriority
 }
 struct	MSYS_CONFIG
 {
-	u32			sign1;	// 0x12071980;
-	u32			sign2;	// 0x26111975;
-	u32			is_battleye;
+	u32			sign1;
+	u32			sign2;
 };
 struct	MSYS_PING
 {

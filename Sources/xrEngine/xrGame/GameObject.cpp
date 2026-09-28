@@ -24,7 +24,6 @@
 #include "../../xrNetServer/net_utils.h"
 #include "script_callback_ex.h"
 #include "MathUtils.h"
-#include "game_cl_base_weapon_usage_statistic.h"
 #include "game_level_cross_table.h"
 #include "animation_movement_controller.h"
 #include "game_object_space.h"
@@ -170,24 +169,8 @@ void CGameObject::OnEvent		(NET_Packet& P, u16 type)
 			CObject*	Hitter = Level().Objects.net_Find(HDS.whoID);
 			CObject*	Weapon = Level().Objects.net_Find(HDS.weaponID);
 			HDS.who		= Hitter;
-			//-------------------------------------------------------
-			switch (HDS.PACKET_TYPE)
-			{
-			case GE_HIT_STATISTIC:
-				{
-					if (GameID() != GAME_SINGLE)
-						Game().m_WeaponUsageStatistic->OnBullet_Check_Request(&HDS);
-				}break;
-			default:
-				{
-				}break;
-			}
 			SetHitInfo(Hitter, Weapon, HDS.bone(), HDS.p_in_bone_space, HDS.dir);
 			Hit				(&HDS);
-			//---------------------------------------------------------------------------
-			if (GameID() != GAME_SINGLE)
-				Game().m_WeaponUsageStatistic->OnBullet_Check_Result(false);
-			//---------------------------------------------------------------------------
 		}
 		break;
 	case GE_DESTROY:

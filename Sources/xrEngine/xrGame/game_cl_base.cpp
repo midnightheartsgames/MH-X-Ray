@@ -10,13 +10,10 @@
 #include "UI/UIGameTutorial.h"
 #include "UI/UIMessagesWindow.h"
 #include "string_table.h"
-#include "game_cl_base_weapon_usage_statistic.h"
 
-#include "game_sv_mp_vote_flags.h"
 
 game_cl_GameState::game_cl_GameState()
 {
-	m_WeaponUsageStatistic		= xr_new<WeaponUsageStatistic>();
 
 	local_player				= 0;
 	m_game_type_name			= 0;
@@ -39,7 +36,6 @@ game_cl_GameState::~game_cl_GameState()
 
 	shedule_unregister();
 
-	xr_delete					(m_WeaponUsageStatistic);
 }
 
 void	game_cl_GameState::net_import_GameTime		(NET_Packet& P)
@@ -80,7 +76,6 @@ void	game_cl_GameState::net_import_state	(NET_Packet& P)
 	P.r_u32			(m_start_time);
 	m_u16VotingEnabled = u16(P.r_u8());
 	m_bServerControlHits = !!P.r_u8();	
-	m_WeaponUsageStatistic->SetCollectData(!!P.r_u8());
 
 	// Players
 	u16	p_count;
@@ -190,13 +185,6 @@ void game_cl_GameState::TranslateGameMessage	(u32 msg, NET_Packet& P)
 	case GAME_EVENT_PLAYER_CONNECTED:
 		{
 
-#ifdef BATTLEYE
-			if ( g_pGameLevel && Level().battleye_system.GetTestClient() )
-			{
-				bool res_battleye = Level().battleye_system.LoadClient();
-				VERIFY( res_battleye );
-			}
-#endif // BATTLEYE
 
 			string64 PlayerName;
 			P.r_stringZ(PlayerName);
@@ -290,19 +278,7 @@ void game_cl_GameState::shedule_Update		(u32 dt)
 	if(!m_game_ui_custom){
 		if( HUD().GetUI() )
 			m_game_ui_custom = HUD().GetUI()->UIGame();
-	} 
-	//---------------------------------------
-	switch (Phase())
-	{
-	case GAME_PHASE_INPROGRESS:
-		{
-			if (!IsGameTypeSingle())
-				m_WeaponUsageStatistic->Update();
-		}break;
-	default:
-		{
-		}break;
-	};
+	}
 };
 
 void game_cl_GameState::StartStopMenu(CUIDialogWnd* pDialog, bool bDoHideIndicators)
@@ -372,17 +348,6 @@ void				game_cl_GameState::OnSwitchPhase			(u32 old_phase, u32 new_phase)
 		{
 		}break;
 	};
-
-	switch (new_phase)
-	{
-		case GAME_PHASE_INPROGRESS:
-			{
-				m_WeaponUsageStatistic->Clear();
-			}break;
-		default:
-			{
-			}break;
-	}	
 }
 
 void				game_cl_GameState::SendPickUpEvent		(u16 ID_who, u16 ID_what)

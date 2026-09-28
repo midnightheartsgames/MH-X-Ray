@@ -126,8 +126,6 @@ public:
 
 
 //==============================================================================
-class CServerInfo;
-
 class XRNETSERVER_API 
 IPureServer
   : private MultipacketReciever
@@ -136,7 +134,6 @@ public:
 	enum EConnect
 	{
 		ErrConnect,
-		ErrBELoad,
 		ErrNoLevel,
 		ErrMax,
 		ErrNoError = ErrMax,
@@ -231,7 +228,6 @@ public:
 	
 	virtual bool			Check_ServerAccess( IClient* CL, string512& reason )	{ return true; }
 	virtual void			Assign_ServerType( string512& res ) {};
-	virtual void			GetServerInfo( CServerInfo* si ) {};
 
 	IClient*				GetServerClient		()			{ return SV_Client; };
 

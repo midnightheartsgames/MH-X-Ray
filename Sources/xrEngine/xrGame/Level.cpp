@@ -38,7 +38,6 @@
 #include "level_sounds.h"
 #include "car.h"
 #include "trade_parameters.h"
-#include "game_cl_base_weapon_usage_statistic.h"
 #include "clsid_game.h"
 #include "MainMenu.h"
 #include "..\XR_IOConsole.h"
@@ -270,11 +269,6 @@ shared_str	CLevel::name		() const
 	return						(m_name);
 }
 
-void CLevel::GetLevelInfo( CServerInfo* si )
-{
-	Server->GetServerInfo( si );
-}
-
 
 void CLevel::PrefetchSound		(LPCSTR name)
 {
@@ -400,8 +394,6 @@ void CLevel::ProcessGameEvents		()
 			}			
 		}
 	}
-	if (OnServer() && GameID()!= GAME_SINGLE)
-		Game().m_WeaponUsageStatistic->Send_Check_Respond();
 }
 
 #ifdef DEBUG_MEMORY_MANAGER
@@ -1008,14 +1000,6 @@ bool	IsGameTypeSingle()
 	return g_pGamePersistent->GameType()==GAME_SINGLE || g_pGamePersistent->GameType()==GAME_ANY;
 }
 
-#ifdef BATTLEYE
-
-bool CLevel::TestLoadBEClient()
-{
-	return battleye_system.TestLoadClient();
-}
-
-#endif // BATTLEYE
 
 GlobalFeelTouch::GlobalFeelTouch()
 {

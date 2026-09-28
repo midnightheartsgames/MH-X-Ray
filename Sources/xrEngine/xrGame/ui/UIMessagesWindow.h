@@ -1,5 +1,4 @@
 // File:		UIMessagesWindow.h
-// Description:	Window with MP chat and Game Log ( with PDA messages in single and Kill Messages in MP)
 // Created:		22.04.2005
 // Author:		Serge Vynnychenko
 // Mail:		narrator@gsc-game.kiev.ua
@@ -14,8 +13,6 @@
 #include "../InfoPortionDefs.h"
 
 class CUIGameLog;
-class CUIChatWnd;
-class game_cl_GameState;
 class CUIPdaMsgListItem;
 class CUIProgressShape;
 
@@ -28,9 +25,6 @@ public:
 
 	void				AddLogMessage					(const shared_str& msg);
 	void				AddLogMessage					(KillMessageStruct& msg);
-	void				AddChatMessage					(shared_str msg, shared_str author);
-	void				SetChatOwner					(game_cl_GameState* owner);
-	CUIChatWnd*			GetChatWnd						() {return m_pChatWnd;}
 
 	virtual void		Update();
 
@@ -39,8 +33,5 @@ protected:
 	virtual void Init(float x, float y, float width, float height);
 
 
-	CUIGameLog*			m_pChatLog;
-	CUIChatWnd*			m_pChatWnd;
 	CUIGameLog*			m_pGameLog;
-//	Frect				m_ListPos2;
 };

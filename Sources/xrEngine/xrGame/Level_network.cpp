@@ -121,9 +121,6 @@ void CLevel::ClientSend()
 		if ( !net_HasBandwidth() ) return;
 	};
 
-#ifdef BATTLEYE
-	battleye_system.UpdateClient();
-#endif // BATTLEYE
 
 	NET_Packet				P;
 	u32						start	= 0;
@@ -366,21 +363,12 @@ void			CLevel::OnConnectResult				(NET_Packet*	P)
 		m_bConnectResult	= false			;	
 		switch (res1)
 		{
-		case 0:		//Standart error
+		case 0:
 			{
 				if (!xr_strcmp(ResultStr, "Data verification failed. Cheater? [2]"))
 					MainMenu()->SetErrorDialog(CMainMenu::ErrDifferentVersion);
 			}break;
-		case 1:		//GameSpy CDKey
-			{
-				if (!xr_strcmp(ResultStr, "Invalid CD Key"))
-					MainMenu()->SetErrorDialog(CMainMenu::ErrCDKeyInvalid);//, ResultStr);
-				if (!xr_strcmp(ResultStr, "CD Key in use"))
-					MainMenu()->SetErrorDialog(CMainMenu::ErrCDKeyInUse);//, ResultStr);
-				if (!xr_strcmp(ResultStr, "Your CD Key is disabled. Contact customer service."))
-					MainMenu()->SetErrorDialog(CMainMenu::ErrCDKeyDisabled);//, ResultStr);
-			}break;		
-		case 2:		//login+password
+		case 2:
 			{
 				MainMenu()->SetErrorDialog(CMainMenu::ErrInvalidPassword);
 			}break;		

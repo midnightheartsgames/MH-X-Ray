@@ -23,7 +23,29 @@
 #include "ef_pattern.h"
 #include "trade_parameters.h"
 
-extern u32 get_rank								(const shared_str &section);
+static u32 get_rank								(const shared_str &section)
+{
+	static const u32		rank_count = 5;
+	static shared_str		ranks[rank_count];
+	if (!ranks[0].size()) {
+		string32			rank_section;
+		for (u32 i = 0; i < rank_count; ++i) {
+			sprintf_s		(rank_section, "rank_%d", i);
+			ranks[i]		= pSettings->r_string(rank_section, "available_items");
+		}
+	}
+
+	u32						rank = rank_count;
+	for (u32 i = 0; i < rank_count; ++i) {
+		if (strstr(ranks[i].c_str(), section.c_str())) {
+			rank				= i;
+			break;
+		}
+	}
+
+	R_ASSERT3				(rank < rank_count, "cannot find rank for", section.c_str());
+	return					(rank);
+}
 
 static const int MAX_AMMO_ATTACH_COUNT = 10;
 static const int enough_ammo_box_count = 1;

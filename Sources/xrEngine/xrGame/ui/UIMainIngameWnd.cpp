@@ -1179,9 +1179,7 @@ CUIGameTutorial* g_tut = NULL;
 //CPostprocessAnimator* pp = NULL;
 //extern void create_force_progress();
 
-//#include "UIVotingCategory.h"
 
-//CUIVotingCategory* v = NULL;
 #include "UIFrameWindow.h"
 CUIFrameWindow*		pUIFrame = NULL;
 

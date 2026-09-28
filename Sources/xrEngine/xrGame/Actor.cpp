@@ -23,7 +23,6 @@
 #include "CustomOutfit.h"
 #include "actorcondition.h"
 #include "UIGameCustom.h"
-#include "game_cl_base_weapon_usage_statistic.h"
 
 // breakpoints
 #include "../xr_input.h"
@@ -580,13 +579,7 @@ void	CActor::Hit							(SHit* pHDS)
 
 			HDS.power			= hit_power;
 			inherited::Hit		(&HDS);
-
-			if(OnServer() && !g_Alive() && HDS.hit_type==ALife::eHitTypeExplosion)
-			{
-				game_PlayerState* ps							= Game().GetPlayerByGameID(ID());
-				Game().m_WeaponUsageStatistic->OnExplosionKill	(ps, HDS);
-			}
-		}		
+		}
 		break;
 	}
 }

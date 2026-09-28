@@ -109,13 +109,6 @@ void	xrServer::SendConnectResult(IClient* CL, u8 res, u8 res1, char* ResultStr)
 	
 };
 
-void xrServer::Check_GameSpy_CDKey_Success			(IClient* CL)
-{
-	if (NeedToCheckClient_BuildVersion(CL))				return;
-	//-------------------------------------------------------------
-	Check_BuildVersion_Success(CL);	
-};
-
 BOOL	g_SV_Disable_Auth_Check = FALSE;
 
 bool xrServer::NeedToCheckClient_BuildVersion		(IClient* CL)	
