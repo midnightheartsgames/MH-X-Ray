@@ -363,20 +363,10 @@ void CRender::Render		()
 		Wallmarks->Render						();				// wallmarks has priority as normal geometry
 	}
 
-	// Update incremental shadowmap-visibility solver
-	{
-		u32 it=0;
-		for (it=0; it<Lights_LastFrame.size(); it++)	{
-			if (0==Lights_LastFrame[it])	continue	;
-			try {
-				Lights_LastFrame[it]->svis.flushoccq()	;
-			} catch (...)
-			{
-				Msg	("! Failed to flush-OCCq on light [%d] %X",it,*(u32*)(&Lights_LastFrame[it]));
-			}
-		}
-		Lights_LastFrame.clear	();
+	for (u32 it=0; it<Lights_LastFrame.size(); it++)	{
+		if (Lights_LastFrame[it])	Lights_LastFrame[it]->svis.flushoccq	();
 	}
+	Lights_LastFrame.clear	();
 
 	// Directional light - fucking sun
 	if (bSUN)	{

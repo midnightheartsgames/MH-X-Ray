@@ -21,8 +21,9 @@ light::light		(void)	: ISpatial(g_SpatialSpace)
 	ZeroMemory		(omnipart,sizeof(omnipart));
 	s_spot			= NULL;
 	s_point			= NULL;
-	vis.frame2test	= 0;	// xffffffff;
-	vis.query_id	= 0;
+	m_xform_frame	= u32(-1);
+	vis.frame2test	= 0;
+	vis.query_id	= R_occlusion::invalid_id;
 	vis.query_order	= 0;
 	vis.visible		= true;
 	vis.pending		= false;

@@ -35,43 +35,47 @@ void	R_occlusion::occq_destroy	(				)
 	pool.clear	();
 	fids.clear	();
 }
+bool	R_occlusion::issued			(u32	ID		) const
+{
+	return	(ID<used.size()) && (0!=used[ID].Q);
+}
 u32		R_occlusion::occq_begin		(u32&	ID		)
 {
 	if (!enabled)		return 0;
 
+	if (pool.empty())	{
+		ID				= invalid_id;
+		return			0;
+	}
+
 	RImplementation.stats.o_queries	++;
 	if (!fids.empty())	{
-		ID				= fids.back	();	
+		ID				= fids.back	();
 		fids.pop_back	();
-		VERIFY				( pool.size() );
-		used[ID]			= pool.back	();
+		used[ID]		= pool.back	();
 	} else {
-		ID					= used.size	();
-		VERIFY				( pool.size() );
-		used.push_back		(pool.back());
+		ID				= used.size	();
+		used.push_back	(pool.back());
 	}
 	pool.pop_back			();
 	CHK_DX					(used[ID].Q->Issue	(D3DISSUE_BEGIN));
-	
-	// Msg				("begin: [%2d] - %d", used[ID].order, ID);
 
 	return			used[ID].order;
 }
 void	R_occlusion::occq_end		(u32&	ID		)
 {
 	if (!enabled)		return;
+	if (!issued(ID))	return;
 
-	// Msg				("end  : [%2d] - %d", used[ID].order, ID);
 	CHK_DX			(used[ID].Q->Issue	(D3DISSUE_END));
 }
 u32		R_occlusion::occq_get		(u32&	ID		)
 {
 	if (!enabled)		return 0xffffffff;
+	if (!issued(ID))	return 0xffffffff;
 
 	DWORD	fragments	= 0;
 	HRESULT hr;
-	// CHK_DX		(used[ID].Q->GetData(&fragments,sizeof(fragments),D3DGETDATA_FLUSH));
-	// Msg			("get  : [%2d] - %d => %d", used[ID].order, ID, fragments);
 	CTimer	T;
 	T.Start	();
 	Device.Statistic->RenderDUMP_Wait.Begin	();
@@ -87,7 +91,6 @@ u32		R_occlusion::occq_get		(u32&	ID		)
 
 	if (0==fragments)	RImplementation.stats.o_culled	++;
 
-	// insert into pool (sorting in decreasing order)
 	_Q&		Q			= used[ID];
 	if (pool.empty())	pool.push_back(Q);
 	else	{
@@ -96,9 +99,8 @@ u32		R_occlusion::occq_get		(u32&	ID		)
 		pool.insert		(pool.begin()+it+1,Q);
 	}
 
-	// remove from used and shrink as nescessary
 	used[ID].Q			= 0;
 	fids.push_back		(ID);
-	ID					= 0;
+	ID					= invalid_id;
 	return	fragments;
 }

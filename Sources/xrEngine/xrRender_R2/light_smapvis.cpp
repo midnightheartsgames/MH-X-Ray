@@ -5,10 +5,16 @@
 {
 	invalidate				();
 	frame_sleep				= 0;
+	test_count				= 0;
+	test_current			= 0;
+	testQ_V					= 0;
+	testQ_id				= R_occlusion::invalid_id;
+	testQ_frame				= 0;
+	testQ_pending			= false;
 }
 		smapvis::~smapvis	()
 {
-	flushoccq				();
+	resetoccq				();
 	invalidate				();
 }
 void	smapvis::invalidate	()
@@ -40,7 +46,6 @@ void	smapvis::begin		()
 }
 void	smapvis::end		()
 {
-	// Gather stats
 	u32	ts,td;
 	RImplementation.get_Counters	(ts,td);
 	RImplementation.stats.ic_total	+=	ts;
@@ -48,7 +53,6 @@ void	smapvis::end		()
 
 	switch	(state)			{
 	case state_counting:
-		// switch to 'working'
 		if (sleep())		{
 			test_count						= ts;
 			test_current					= 0;
@@ -56,8 +60,6 @@ void	smapvis::end		()
 		}
 		break;
 	case state_working:
-		// feedback should be called at this time -> clear feedback
-		// issue query
 		if (testQ_V)
 		{
 			RImplementation.occq_begin				(testQ_id);
@@ -65,34 +67,29 @@ void	smapvis::end		()
 			RImplementation.r_dsgraph_insert_static	(testQ_V);
 			RImplementation.r_dsgraph_render_graph	(0);
 			RImplementation.occq_end				(testQ_id);
-			testQ_frame								= Device.dwFrame + 1;	// get result on next frame
+			testQ_frame								= Device.dwFrame + 1;
+			testQ_pending							= true;
 		}
 		break;
 	case state_usingTC:
-		// nothing to do
 		break;
 	}
 }
 
 void	smapvis::flushoccq	()
 {
-	// the tough part
-	if	(testQ_frame != Device.dwFrame)			return;
-	u32	fragments	=	RImplementation.occq_get(testQ_id);
+	if	(!testQ_pending || (testQ_frame > Device.dwFrame))	return;
+	testQ_pending		= false;
+	u32	fragments		= RImplementation.occq_get(testQ_id);
+	if	((testQ_frame != Device.dwFrame) || (state != state_working))	return;
 	if	(0==fragments)			{
-		// this is invisible shadow-caster, register it
-		// next time we will not get this caster, so 'test_current' remains the same
 		invisible.push_back	(testQ_V);
 		test_count			--;
 		testQ_V				= 0;
 	} else {
-		// this is visible shadow-caster, advance testing
 		test_current		++;
 	}
-	if (test_current==test_count)	{
-		// we are at the end of list
-		if (state==state_working)	state	= state_usingTC;
-	}
+	if (test_current==test_count)	state	= state_usingTC;
 }
 void	smapvis::resetoccq	()
 {

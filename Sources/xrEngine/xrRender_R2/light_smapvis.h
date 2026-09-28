@@ -16,15 +16,16 @@ public:
 	IRender_Visual*				testQ_V;
 	u32							testQ_id;
 	u32							testQ_frame;
+	bool						testQ_pending;
 public:
 	smapvis			();
 	~smapvis		();
 
 	void			invalidate	();
-	void			begin		();			// should be called before 'marker++' and before graph-build
+	void			begin		();
 	void			end			();
 	void			mark		();
-	void			flushoccq	();			// should be called when no rendering of light is supposed
+	void			flushoccq	();
 
 	void			resetoccq	();
 

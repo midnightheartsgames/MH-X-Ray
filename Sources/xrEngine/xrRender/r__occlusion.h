@@ -1,16 +1,6 @@
 #pragma once
 
-const		u32					occq_size			= 2*768; //256	;	// queue for occlusion queries
-
-// must conform to following order of allocation/free
-// a(A), a(B), a(C), a(D), ....
-// f(A), f(B), f(C), f(D), ....
-// a(A), a(B), a(C), a(D), ....
-//	this mean:
-//		use as litle of queries as possible
-//		first try to use queries allocated first
-//	assumption:
-//		used queries number is much smaller than total count
+const		u32					occq_size			= 2*768;
 
 class R_occlusion
 {
@@ -20,17 +10,21 @@ private:
 		IDirect3DQuery9*	Q;
 	};
 
-	BOOL					enabled;	// 
-	xr_vector<_Q>			pool;		// sorted (max ... min), insertions are usually at the end
-	xr_vector<_Q>			used;		// id's are generated from this and it is cleared from back only
-	xr_vector<u32>			fids;		// free id's
+	BOOL					enabled;
+	xr_vector<_Q>			pool;
+	xr_vector<_Q>			used;
+	xr_vector<u32>			fids;
+
+	bool			issued			(u32	ID		) const;
 public:
+	static const u32		invalid_id		= u32(-1);
+
 	R_occlusion		();
 	~R_occlusion	();
 
 	void			occq_create		(u32	limit	);
 	void			occq_destroy	(				);
-	u32				occq_begin		(u32&	ID		);	// returns 'order'
+	u32				occq_begin		(u32&	ID		);
 	void			occq_end		(u32&	ID		);
 	u32				occq_get		(u32&	ID		);
 };
