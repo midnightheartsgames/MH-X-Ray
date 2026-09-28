@@ -7,7 +7,9 @@ param(
     [int]$TimeoutSeconds = 300,
     [string]$GameDir = (Join-Path $PSScriptRoot '..\..\S.T.A.L.K.E.R. Shadow of Chernobyl'),
     [string]$Baseline,
-    [switch]$Menu
+    [string]$ExtraArguments,
+    [switch]$Menu,
+    [switch]$NewGame
 )
 
 $ErrorActionPreference = 'Stop'
@@ -39,8 +41,11 @@ $smokeConfig = @($userConfig | Where-Object { $overrides.Keys -notcontains ($_ -
 $smokeConfig += $overrides.GetEnumerator() | ForEach-Object { "$($_.Key) $($_.Value)" }
 [System.IO.File]::WriteAllLines((Join-Path $appData 'smoke.ltx'), [string[]]$smokeConfig, $latin1)
 
-$arguments = "-nointro -silent_error_mode -ltx smoke.ltx -smoke_test $Seconds"
-if (-not $Menu) { $arguments += " -start server($Save/single/alife/load) client(localhost)" }
+$arguments = "-nointro -silent_error_mode -ltx smoke.ltx"
+if ($ExtraArguments) { $arguments += " $ExtraArguments" }
+$arguments += " -smoke_test $Seconds"
+if ($NewGame) { $arguments += " -start server(all/single/alife/new) client(localhost)" }
+elseif (-not $Menu) { $arguments += " -start server($Save/single/alife/load) client(localhost)" }
 $startTime = Get-Date
 $process = Start-Process -FilePath $engine -ArgumentList $arguments -WorkingDirectory $GameDir -PassThru
 $null = $process.Handle
@@ -92,7 +97,7 @@ $crashReports = Get-ChildItem -Path $logDir |
     Where-Object { $_.Name -notlike 'xray_*.log' -and $_.LastWriteTime -ge $startTime }
 
 Write-Output "renderer : $Renderer"
-Write-Output "target   : $(if ($Menu) { 'main menu' } else { $Save })"
+Write-Output "target   : $(if ($NewGame) { 'new game' } elseif ($Menu) { 'main menu' } else { $Save })"
 Write-Output "exit     : $(if ($exited) { $process.ExitCode } else { 'killed' })"
 Write-Output "elapsed  : $elapsed s"
 Write-Output "fps      : $fps"

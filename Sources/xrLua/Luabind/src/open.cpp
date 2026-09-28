@@ -28,7 +28,7 @@
 
 namespace luabind {
 
-    void LUA_CC open(lua_State* L)
+    void open(lua_State* L)
     {
         // get the global class registry, or create one if it doesn't exist
         // (it's global within a lua state)

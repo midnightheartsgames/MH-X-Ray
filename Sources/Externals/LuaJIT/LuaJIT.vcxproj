@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Mixed|Win32">
+      <Configuration>Mixed</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{853D2B10-B375-41B3-891C-91B8298B1847}</ProjectGuid>
+    <RootNamespace>LuaJIT</RootNamespace>
+    <Keyword>MakeFileProj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <Import Project="$(SolutionDir)\X-Ray.props" />
+  <PropertyGroup Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <PropertyGroup>
+    <OutDir>$(SolutionDir)\Output\Binaries\</OutDir>
+    <IntDir>$(SolutionDir)\Output\Intermediate\$(ProjectName)\</IntDir>
+    <LuaJITLibraryDir>$(SolutionDir)\Output\Libraries\</LuaJITLibraryDir>
+    <LuaJITBuildCommand>
+set NoDefaultCurrentDirectoryInExePath=
+robocopy "$(ProjectDir)src" "$(IntDir)src" /E /XX /NJH /NJS /NDL /NFL /NP &gt;nul
+set /a "lj_src_status=%errorlevel%"
+robocopy "$(ProjectDir)dynasm" "$(IntDir)dynasm" /E /XX /NJH /NJS /NDL /NFL /NP &gt;nul
+set /a "lj_dasm_status=%errorlevel%"
+if %lj_src_status% geq 8 exit /b 1
+if %lj_dasm_status% geq 8 exit /b 1
+set /a "lj_copied=(lj_src_status | lj_dasm_status) &amp; 1"
+if %lj_copied%==1 if exist "$(IntDir)src\lua51.dll" del /q "$(IntDir)src\lua51.dll"
+copy /y "$(ProjectDir).relver" "$(IntDir).relver" &gt;nul
+if not exist "$(IntDir)src\lua51.dll" (
+  pushd "$(IntDir)src"
+  call msvcbuild.bat
+  popd
+)
+if not exist "$(IntDir)src\lua51.dll" exit /b 1
+if not exist "$(OutDir)" mkdir "$(OutDir)"
+if not exist "$(LuaJITLibraryDir)" mkdir "$(LuaJITLibraryDir)"
+copy /y "$(IntDir)src\lua51.dll" "$(OutDir)" &gt;nul
+copy /y "$(IntDir)src\lua51.pdb" "$(OutDir)" &gt;nul
+copy /y "$(IntDir)src\lua51.lib" "$(LuaJITLibraryDir)" &gt;nul
+    </LuaJITBuildCommand>
+    <LuaJITCleanCommand>
+if exist "$(IntDir)src" rmdir /s /q "$(IntDir)src"
+if exist "$(IntDir)dynasm" rmdir /s /q "$(IntDir)dynasm"
+if exist "$(OutDir)lua51.dll" del /q "$(OutDir)lua51.dll"
+if exist "$(OutDir)lua51.pdb" del /q "$(OutDir)lua51.pdb"
+if exist "$(LuaJITLibraryDir)lua51.lib" del /q "$(LuaJITLibraryDir)lua51.lib"
+exit /b 0
+    </LuaJITCleanCommand>
+    <NMakeBuildCommandLine>$(LuaJITBuildCommand)</NMakeBuildCommandLine>
+    <NMakeCleanCommandLine>$(LuaJITCleanCommand)</NMakeCleanCommandLine>
+    <NMakeReBuildCommandLine>$(LuaJITCleanCommand.Replace('exit /b 0',''))
+$(LuaJITBuildCommand)</NMakeReBuildCommandLine>
+    <NMakeOutput>$(OutDir)lua51.dll</NMakeOutput>
+    <NMakeIncludeSearchPath>$(ProjectDir)src</NMakeIncludeSearchPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="src\msvcbuild.bat" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>

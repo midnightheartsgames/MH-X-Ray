@@ -121,27 +121,30 @@ void LuaError(lua_State* L)
 	}
 #endif // USE_DL_ALLOCATOR
 
-// export
+static void open_lua_library	(lua_State *L, LPCSTR name, lua_CFunction open)
+{
+	lua_pushcfunction		(L,open);
+	lua_pushstring			(L,name);
+	lua_call				(L,1,0);
+}
+
 void	CResourceManager::LS_Load			()
 {
 #ifndef USE_DL_ALLOCATOR
 	LSVM			= lua_newstate(lua_alloc_xr, NULL);
-#else // USE_XR_ALLOCAOR
+#else
 	LSVM			= lua_newstate(lua_alloc_dl, NULL);
-#endif // USE_XR_ALLOCAOR
+#endif
 	if (!LSVM)		{
 		Msg			("! ERROR : Cannot initialize LUA VM!");
 		return;
 	}
 
-	// initialize lua standard library functions 
-	luaopen_base	(LSVM); 
-	luaopen_table	(LSVM);
-	luaopen_string	(LSVM);
-	luaopen_math	(LSVM);
-#ifdef USE_JIT
-	luaopen_jit		(LSVM);
-#endif
+	open_lua_library	(LSVM,"",luaopen_base);
+	open_lua_library	(LSVM,LUA_TABLIBNAME,luaopen_table);
+	open_lua_library	(LSVM,LUA_STRLIBNAME,luaopen_string);
+	open_lua_library	(LSVM,LUA_MATHLIBNAME,luaopen_math);
+	open_lua_library	(LSVM,LUA_JITLIBNAME,luaopen_jit);
 
 	luabind::open						(LSVM);
 #if !XRAY_EXCEPTIONS
@@ -187,7 +190,7 @@ void	CResourceManager::LS_Load			()
 			.def("zb",							&adopt_compiler::_ZB			,return_reference_to(_1))
 			.def("blend",						&adopt_compiler::_blend			,return_reference_to(_1))
 			.def("aref",						&adopt_compiler::_aref			,return_reference_to(_1))
-			.def("sampler",						&adopt_compiler::_sampler		),	// returns sampler-object
+			.def("sampler",						&adopt_compiler::_sampler		),
 
 		class_<adopt_blend>("blend")
 			.enum_("blend")
@@ -206,7 +209,6 @@ void	CResourceManager::LS_Load			()
 			]
 	];
 
-	// load shaders
 	xr_vector<char*>*	folder			= FS.file_list_open	("$game_shaders$",::Render->getShaderPath(),FS_ListFiles|FS_RootOnly);
 	VERIFY								(folder);
 	for (u32 it=0; it<folder->size(); it++)	{
@@ -225,10 +227,6 @@ void	CResourceManager::LS_Load			()
 		}
 	}
 	FS.file_list_close			(folder);
-
-#ifdef USE_JIT
-	luaJIT_setmode			(LSVM,LUAJIT_MODE_ENGINE,LUAJIT_MODE_ON);
-#endif
 }
 
 void	CResourceManager::LS_Unload			()

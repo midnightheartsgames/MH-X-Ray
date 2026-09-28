@@ -69,7 +69,7 @@
         $(SolutionDir)\Sources\Externals\Boost\;
         $(SolutionDir)\Sources\Externals\Loki\;
         $(SolutionDir)\Sources\xrCore\;
-        $(SolutionDir)\Sources\xrLua\LuaJIT\src\;
+        $(SolutionDir)\Sources\Externals\LuaJIT\src\;
         $(SolutionDir)\Sources\xrLua\Luabind\
       </AdditionalIncludeDirectories>
     </ClCompile>
