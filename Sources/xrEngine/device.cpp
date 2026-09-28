@@ -431,6 +431,9 @@ void CRenderDevice::OnWM_Activate(WPARAM wParam, LPARAM lParam)
 	BOOL fMinimized					= (BOOL) HIWORD(wParam);
 	BOOL bActive					= ((fActive!=WA_INACTIVE) && (!fMinimized))?TRUE:FALSE;
 
+	if (!bActive && strstr(Core.Params,"-smoke_test "))
+		return;
+
 	if (bActive!=Device.b_is_Active)
 	{
 		Device.b_is_Active				= bActive;

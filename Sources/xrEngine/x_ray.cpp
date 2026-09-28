@@ -919,6 +919,58 @@ void CApplication::OnEvent(EVENT E, u64 P1, u64 P2)
 static	CTimer	phase_timer		;
 extern	ENGINE_API BOOL			g_appLoaded = FALSE;
 
+class CSmokeTest
+{
+	u32				m_duration_ms;
+	u32				m_start_frame;
+	u32				m_inactive_frames;
+	bool			m_armed;
+	bool			m_measuring;
+	CTimerBase		m_timer;
+public:
+					CSmokeTest		() : m_duration_ms(0), m_start_frame(0), m_inactive_frames(0), m_armed(false), m_measuring(false) {}
+
+	void			arm				()
+	{
+		LPCSTR		key				= "-smoke_test ";
+		LPCSTR		value			= strstr(Core.Params,key);
+		m_armed						= (0!=value);
+		m_measuring					= false;
+		if (!m_armed)
+			return;
+
+		m_duration_ms				= u32(atoi(value+xr_strlen(key)))*1000;
+		if (!Device.b_is_Active)
+			Device.OnWM_Activate	(WA_ACTIVE,0);
+	}
+
+	void			update			()
+	{
+		if (!m_armed || Device.dwPrecacheFrame)
+			return;
+
+		if (!m_measuring) {
+			m_measuring				= true;
+			m_start_frame			= Device.dwFrame;
+			m_inactive_frames		= 0;
+			m_timer.Start			();
+			return;
+		}
+
+		if (!Device.b_is_Active)
+			++m_inactive_frames;
+
+		u32			elapsed_ms		= m_timer.GetElapsed_ms();
+		if (elapsed_ms<m_duration_ms)
+			return;
+
+		u32			frames			= Device.dwFrame-m_start_frame;
+		Msg							("* smoke_test: %u frames in %u ms, %.1f fps, %u inactive frames",frames,elapsed_ms,float(frames)*1000.f/float(elapsed_ms),m_inactive_frames);
+		m_armed						= false;
+		Console->Execute			("quit");
+	}
+}	SmokeTest;
+
 void CApplication::LoadBegin	()
 {
 	ll_dwReference++;
@@ -948,7 +1000,7 @@ void CApplication::LoadEnd		()
 		Msg						("* phase cmem: %d K", Memory.mem_usage()/1024);
 		Console->Execute		("stat_memory");
 		g_appLoaded				= TRUE;
-//		DUMP_PHASE;
+		SmokeTest.arm			();
 	}
 }
 
@@ -1015,6 +1067,7 @@ void CApplication::OnFrame	( )
 	g_SpatialSpace->update			();
 	g_SpatialSpacePhysic->update	();
 	if (g_pGameLevel)				g_pGameLevel->SoundEvent_Dispatch	( );
+	SmokeTest.update				( );
 }
 
 void CApplication::Level_Append		(LPCSTR folder)
