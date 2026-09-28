@@ -198,21 +198,33 @@ FPS: разброс между прогонами подряд большой (R
 
 ### Этап 3. Замена x86-only зависимостей (Win32) — L
 
-#### 3.1. LuaJIT 1.0.3 → LuaJIT 2.1
+#### 3.1. LuaJIT 1.0.3 → LuaJIT 2.1 (выполнен 2026-09-28, коммит `d9739dd`; ручная проверка геймплея — за пользователем)
 
-- Исходники LuaJIT 2.1 положить в `Externals/LuaJIT` (зафиксированный коммит). Собирать `msvcbuild.bat` из Makefile-проекта в solution; результат — `lua51.dll` и `lua51.lib` для Win32 и x64. Если Makefile-проект окажется ненадёжным, собрать один раз из x86/x64 Native Tools Command Prompt и закоммитить бинарники.
-- Для x64 обязателен режим GC64: движок создаёт state через `lua_newstate(lua_alloc_xr, …)`, а без GC64 на x64 это не работает.
-- `xrLua.dll` содержит только luabind и линкуется с `lua51.lib`.
-- Правки движка:
-  - `xrGame/script_engine.h:19` — убрать `lcoco.h`; `xrGame/script_storage.cpp:142` — убрать `luaopen_coco`;
-  - `xrGame/script_thread.cpp:62` — `lua_newcthread` → `lua_newthread`;
-  - `xrGame/script_thread.cpp:11` и `:155` — убрать `lstate.h`, `lua()->status` → `lua_status(lua())`;
-  - `-nojit` → `luaJIT_setmode(L, 0, LUAJIT_MODE_ENGINE | LUAJIT_MODE_OFF)`;
-  - проверить `luaJIT_setmode` в `xrEngine/ResourceManager_Scripting.cpp:230` (shader-скрипты R1/R2).
-- Совместимость скриптов SoC (они писались под Lua 5.1 alpha): в распакованных скриптах найти `string.gfind`, `math.mod`, `table.getn`, `table.setn`, `coroutine.yield`, `coco.`, `jit.`. Для реально используемых функций, которых нет в LuaJIT 2.1, добавить алиасы при инициализации script engine.
-- Риск Coco: без него `yield` через границу C (luabind-вызов → Lua → `yield`) даёт ошибку `attempt to yield across C-call boundary`. Проверить скрипты, которые вызывают `coroutine.yield` или `wait()`.
+Что сделано:
 
-Приёмка: `smoke.ps1 -Baseline` на R1 и R2; вручную: новая игра, первые диалоги, получение и сдача квеста, торговля, PDA, 15+ минут игры с A-Life — без Lua-ошибок в логе; `-nojit` работает; медиана FPS не хуже эталона более чем на 10 %.
+- `Externals/LuaJIT` — LuaJIT, ветка `v2.1`, коммит `c6ffc141` от 2026-09-08. Экспортирован через `git archive`, поэтому `.relver` содержит время коммита. Отличия от upstream:
+  - `src/luajit.h` — заголовок, который сборка генерирует из `luajit_rolling.h`; движку он нужен до сборки LuaJIT. `src/.gitignore` из LuaJIT его игнорирует, поэтому файл добавлен через `git add -f`. После обновления LuaJIT его нужно пересоздать.
+  - `src/lj_lex.c` — лексер принимает комментарии `//` и `/* */`, как лексер GSC в LuaJIT 1.0.3. Их используют 27 игровых скриптов и 13 шейдерных скриптов R2. Старый лексер не считал строки внутри `/* */`, новый считает, поэтому номера строк в ошибках верные. При обновлении LuaJIT патч нужно перенести.
+- `LuaJIT.vcxproj` — Makefile-проект вокруг `msvcbuild.bat`. Копирует `src` и `dynasm` в `Output\Intermediate\LuaJIT`, собирает там и кладёт `lua51.dll`/`.pdb` в `Output\Binaries`, `lua51.lib` в `Output\Libraries`. Пересобирает только при изменении исходника (проверка по коду возврата robocopy). MSBuild выставляет `NoDefaultCurrentDirectoryInExePath`, и cmd не находит `msvcbuild.bat`, `minilua` и `buildvm` в текущей папке; сборочный шаг сбрасывает эту переменную. Архитектуру `msvcbuild.bat` берёт из компилятора, поэтому для x64 (GC64 по умолчанию) на этапе 4 нужны только отдельные папки вывода.
+- `xrLua.dll` содержит только luabind и линкуется с `lua51.lib`. LuaJIT 1.0.3 и Coco удалены. Из luabind убран `LUA_CC`: в 2.1 этого макроса нет, а соглашение о вызове по умолчанию и так cdecl.
+- Движок:
+  - библиотеки открываются через `lua_call`, как требует LuaJIT 2.1;
+  - `string.gfind` и `math.mod` — алиасы на `gmatch` и `fmod` (12 и 5 скриптов); `table.getn` и `table.foreach` в 2.1 есть;
+  - JIT включён для игровых и шейдерных скриптов, как в исходной игре: старый `lua.h` определял `USE_JIT`. `-nojit` выключает JIT для игровых скриптов через `luaJIT_setmode`. В лог пишется `* LuaJIT 2.1.<relver>, JIT on|off`;
+  - `lua_newcthread` → `lua_newthread`, `lua()->status` → `lua_status`; `lcoco.h` и `lstate.h` не используются;
+  - ошибки загрузки и выполнения Lua пишутся в лог и в Release (`! [LUA] ...`). Раньше Release их молча отбрасывал, и проверить «нет Lua-ошибок в логе» было нельзя.
+- Coco: без него `yield` через границу C не работает. Но потоки скриптов (`CScriptThread`) в обычной игре не запускаются: `[single] script` пуст, `level_scripts` нет ни в одном уровне, `wait()` вызывается только из `main()` тестовых скриптов. Затронуты только консольные `run_script` и `run_string`.
+- Скрипты: неявный `arg` в vararg-функциях не работал и в 1.0.3 (`LUA_COMPAT_VARARG` был выключен). Все 509 скриптов и шейдерных скриптов из архивов проверены `luajit.exe` на синтаксис. Не компилируются 6 файлов, все они не компилировались и в оригинале и нигде не подключаются: `lua_help.script`, `copy of _test.script`, `test_ini.script`, `mob_alife_control.script`, `gulag_selo.script`, `config/misc/gulag_radar_u.script`.
+- `smoke.ps1`: добавлены `-ExtraArguments` (ключи движка перед `-start`) и `-NewGame` (`server(all/single/alife/new)`).
+
+Приёмка:
+
+- `smoke.ps1 -Baseline` на R1 и R2, уровень и меню — PASS; в логе `JIT on`, строк `[LUA]` нет.
+- `-ExtraArguments -nojit` — PASS, в логе `JIT off`.
+- Новая игра (`-NewGame -Seconds 60`) — PASS, ошибок Lua нет.
+- 15 минут A-Life на эталонном сейве (`-Seconds 900`) — PASS, ошибок Lua нет.
+- FPS, медиана трёх прогонов: R1 769 (этап 2 — 772), R2 386,5 (этап 2 — 390).
+- Вручную не проверено, нужен игрок: первые диалоги, получение и сдача квеста, торговля, PDA.
 
 #### 3.2. Звук: OpenAL Soft
 
@@ -308,9 +320,8 @@ FPS: разброс между прогонами подряд большой (R
 
 > Работай по `Docs/x64-port-plan.md`, этап N, срез M. Выполни только работы этого среза, проверь приёмку и остановись. Соблюдай `AGENTS.md`: ноль комментариев в коде, данные игры только через оверрайды в `gamedata\`, Win32 после задачи собирается и запускается. В отчёте: что изменено, результат сборки, результат `smoke.ps1`, что не сделано и почему.
 
-Срезы (этапы 0–2 выполнены):
+Срезы (этапы 0–2 и срез 3.1 выполнены):
 
-- **3.1:** замени LuaJIT 1.0.3 на LuaJIT 2.1 (`lua51.dll`, GC64 для x64), убери Coco, добавь алиасы только для реально используемых функций Lua 5.0. Прогони Lua-чек-лист.
 - **3.2 / 3.3:** OpenAL Soft вместо router и EAX; раздели DX-библиотеки по платформам.
 - **4:** добавь `Mixed|x64` и `Release|x64`, x64-пути вывода, `/we4311 /we4312 /we4302`, x64-сборку внешних библиотек, `binaries_x64` и `Launch_x64.cmd`.
 - **5:** собери `<проект>` под x64 по правилам этапа 5. Массово не правь C4267/C4244.
