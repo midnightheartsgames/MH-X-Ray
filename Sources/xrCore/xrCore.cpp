@@ -1,17 +1,15 @@
-// xrCore.cpp : Defines the entry point for the DLL application.
-//
 #include "stdafx.h"
 #pragma hdrstop
 
 #include <mmsystem.h>
 #include <objbase.h>
 #include "xrCore.h"
- 
+
 #pragma comment(lib,"winmm.lib")
 
 #ifdef DEBUG
 #	include	<malloc.h>
-#endif // DEBUG
+#endif
 
 XRCORE_API		xrCore	Core;
 XRCORE_API		u32		build_id;
@@ -24,39 +22,34 @@ namespace CPU
 
 static u32	init_counter	= 0;
 
-extern char g_application_path[256];
-
-//. extern xr_vector<shared_str>*	LogFile;
+static void	reset_floating_point_control	()
+{
+	_clear87		();
+#ifdef _M_IX86
+	_control87		( _PC_53,   MCW_PC );
+#endif
+	_control87		( _RC_NEAR, MCW_RC );
+	_control87		( _MCW_EM,  MCW_EM );
+}
 
 void xrCore::_initialize	(LPCSTR _ApplicationName, LogCallback cb, BOOL init_fs, LPCSTR fs_fname)
 {
 	strcpy_s					(ApplicationName,_ApplicationName);
 	if (0==init_counter) {
-#ifdef XRCORE_STATIC	
-		_clear87	();
-		_control87	( _PC_53,   MCW_PC );
-		_control87	( _RC_CHOP, MCW_RC );
-		_control87	( _RC_NEAR, MCW_RC );
-		_control87	( _MCW_EM,  MCW_EM );
+#ifdef XRCORE_STATIC
+		reset_floating_point_control	();
 #endif
-		// Init COM so we can use CoCreateInstance
-//		HRESULT co_res = 
-			CoInitializeEx (NULL, COINIT_MULTITHREADED);
+		CoInitializeEx		(NULL, COINIT_MULTITHREADED);
 
 		strcpy_s			(Params,sizeof(Params),GetCommandLine());
 		_strlwr_s			(Params,sizeof(Params));
 
 		string_path		fn,dr,di;
 
-		// application path
         GetModuleFileName(GetModuleHandle(MODULE_NAME),fn,sizeof(fn));
         _splitpath		(fn,dr,di,0,0);
         strconcat		(sizeof(ApplicationPath),ApplicationPath,dr,di);
-#ifndef _EDITOR
-		strcpy_s		(g_application_path,sizeof(g_application_path),ApplicationPath);
-#endif
 
-		// working path
         if( strstr(Params,"-wf") )
         {
             string_path				c_name;
@@ -66,16 +59,14 @@ void xrCore::_initialize	(LPCSTR _ApplicationName, LogCallback cb, BOOL init_fs,
         }
 		GetCurrentDirectory(sizeof(WorkingPath),WorkingPath);
 
-		// User/Comp Name
 		DWORD	sz_user		= sizeof(UserName);
 		GetUserName			(UserName,&sz_user);
 
 		DWORD	sz_comp		= sizeof(CompName);
 		GetComputerName		(CompName,&sz_comp);
 
-		// Mathematics & PSI detection
 		CPU::Detect			();
-		
+
 		Memory._initialize	(strstr(Params,"-mem_debug") ? TRUE : FALSE);
 
 		DUMP_PHASE;
@@ -83,14 +74,11 @@ void xrCore::_initialize	(LPCSTR _ApplicationName, LogCallback cb, BOOL init_fs,
 		InitLog				();
 		_initialize_cpu		();
 
-//		Debug._initialize	();
-
 		rtc_initialize		();
 
 		xr_FS				= xr_new<CLocatorAPI>	();
 
 		xr_EFS				= xr_new<EFS_Utils>		();
-//.		R_ASSERT			(co_res==S_OK);
 	}
 	if (init_fs){
 		u32 flags			= 0;
@@ -99,10 +87,10 @@ void xrCore::_initialize	(LPCSTR _ApplicationName, LogCallback cb, BOOL init_fs,
 #ifdef DEBUG
 		if (strstr(Params,"-cache"))  flags |= CLocatorAPI::flCacheFiles;
 		else flags &= ~CLocatorAPI::flCacheFiles;
-#endif // DEBUG
-#ifdef _EDITOR // for EDITORS - no cache
+#endif
+#ifdef _EDITOR
 		flags 				&=~ CLocatorAPI::flCacheFiles;
-#endif // _EDITOR
+#endif
 		flags |= CLocatorAPI::flScanAppRoot;
 
 #ifndef	_EDITOR
@@ -118,7 +106,7 @@ void xrCore::_initialize	(LPCSTR _ApplicationName, LogCallback cb, BOOL init_fs,
 		Msg					("CRT heap 0x%08x",_get_heap_handle());
 		Msg					("Process heap 0x%08x",GetProcessHeap());
     #endif
-#endif // DEBUG
+#endif
 	}
 	SetLogCB				(cb);
 	init_counter++;
@@ -151,7 +139,6 @@ void xrCore::_destroy		()
 
 #ifndef XRCORE_STATIC
 
-//. why ??? 
 #ifdef _EDITOR
 	BOOL WINAPI DllEntryPoint(HINSTANCE hinstDLL, DWORD ul_reason_for_call, LPVOID lpvReserved)
 #else
@@ -161,14 +148,7 @@ void xrCore::_destroy		()
 	switch (ul_reason_for_call)
 	{
 	case DLL_PROCESS_ATTACH:
-		{
-			_clear87		();
-			_control87		( _PC_53,   MCW_PC );
-			_control87		( _RC_CHOP, MCW_RC );
-			_control87		( _RC_NEAR, MCW_RC );
-			_control87		( _MCW_EM,  MCW_EM );
-		}
-//.		LogFile.reserve		(256);
+		reset_floating_point_control	();
 		break;
 	case DLL_THREAD_ATTACH:
 		CoInitializeEx	(NULL, COINIT_MULTITHREADED);
@@ -179,9 +159,9 @@ void xrCore::_destroy		()
 	case DLL_PROCESS_DETACH:
 #ifdef USE_MEMORY_MONITOR
 		memory_monitor::flush_each_time	(true);
-#endif // USE_MEMORY_MONITOR
+#endif
 		break;
 	}
     return TRUE;
 }
-#endif // XRCORE_STATIC
+#endif

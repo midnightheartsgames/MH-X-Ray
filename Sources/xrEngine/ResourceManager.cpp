@@ -140,10 +140,6 @@ Shader*	CResourceManager::_cpp_Create	(IBlender* B, LPCSTR s_shader, LPCSTR s_te
 	CBlender_Compile	C;
 	Shader				S;
 
-	//.
-	// if (strstr(s_shader,"transparent"))	__asm int 3;
-
-	// Access to template
 	C.BT				= B;
 	C.bEditor			= FALSE;
 	C.bDetail			= FALSE;
@@ -152,32 +148,26 @@ Shader*	CResourceManager::_cpp_Create	(IBlender* B, LPCSTR s_shader, LPCSTR s_te
 	C.bEditor			= TRUE;
 #endif
 
-	// Parse names
 	_ParseList			(C.L_textures,	s_textures	);
 	_ParseList			(C.L_constants,	s_constants	);
 	_ParseList			(C.L_matrices,	s_matrices	);
 
-	// Compile element	(LOD0 - HQ)
 	{
 		C.iElement			= 0;
 		C.bDetail			= m_textures_description.GetDetailTexture(C.L_textures[0],C.detail_texture,C.detail_scaler);
-//.		C.bDetail			= _GetDetailTexture(*C.L_textures[0],C.detail_texture,C.detail_scaler);
 		ShaderElement		E;
 		C._cpp_Compile		(&E);
 		S.E[0]				= _CreateElement	(E);
 	}
 
-	// Compile element	(LOD1)
 	{
 		C.iElement			= 1;
-//.		C.bDetail			= _GetDetailTexture(*C.L_textures[0],C.detail_texture,C.detail_scaler);
 		C.bDetail			= m_textures_description.GetDetailTexture(C.L_textures[0],C.detail_texture,C.detail_scaler);
 		ShaderElement		E;
 		C._cpp_Compile		(&E);
 		S.E[1]				= _CreateElement	(E);
 	}
 
-	// Compile element
 	{
 		C.iElement			= 2;
 		C.bDetail			= FALSE;
@@ -186,7 +176,6 @@ Shader*	CResourceManager::_cpp_Create	(IBlender* B, LPCSTR s_shader, LPCSTR s_te
 		S.E[2]				= _CreateElement	(E);
 	}
 
-	// Compile element
 	{
 		C.iElement			= 3;
 		C.bDetail			= FALSE;
@@ -195,16 +184,14 @@ Shader*	CResourceManager::_cpp_Create	(IBlender* B, LPCSTR s_shader, LPCSTR s_te
 		S.E[3]				= _CreateElement	(E);
 	}
 
-	// Compile element
 	{
 		C.iElement			= 4;
-		C.bDetail			= TRUE;	//.$$$ HACK :)
+		C.bDetail			= TRUE;
 		ShaderElement		E;
 		C._cpp_Compile		(&E);
 		S.E[4]				= _CreateElement	(E);
 	}
 
-	// Compile element
 	{
 		C.iElement			= 5;
 		C.bDetail			= FALSE;
@@ -213,11 +200,9 @@ Shader*	CResourceManager::_cpp_Create	(IBlender* B, LPCSTR s_shader, LPCSTR s_te
 		S.E[5]				= _CreateElement	(E);
 	}
 
-	// Search equal in shaders array
 	for (u32 it=0; it<v_shaders.size(); it++)
 		if (S.equal(v_shaders[it]))	return v_shaders[it];
 
-	// Create _new_ entry
 	Shader*		N			=	xr_new<Shader>(S);
 	N->dwFlags				|=	xr_resource_flagged::RF_REGISTERED;
 	v_shaders.push_back		(N);

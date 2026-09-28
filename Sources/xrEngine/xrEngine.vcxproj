@@ -208,7 +208,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="_d3d_extensions.h" />
-    <ClInclude Include="CopyProtection.h" />
     <ClInclude Include="defines.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="trivial_encryptor.h" />
@@ -287,7 +286,6 @@
     <ClInclude Include="xrImage_Resampler.h" />
     <ClInclude Include="xrTheora_Stream.h" />
     <ClInclude Include="xrTheora_Surface.h" />
-    <ClInclude Include="xrTheora_Surface_mmx.h" />
     <ClInclude Include="ETextureParams.h" />
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="TextureDescrManager.h" />
@@ -424,7 +422,6 @@
     <ClCompile Include="xrImage_Resampler.cpp" />
     <ClCompile Include="xrTheora_Stream.cpp" />
     <ClCompile Include="xrTheora_Surface.cpp" />
-    <ClCompile Include="xrTheora_Surface_mmx.cpp" />
     <ClCompile Include="ETextureParams.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="ResourceManager_Loader.cpp" />

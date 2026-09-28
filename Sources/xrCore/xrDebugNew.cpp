@@ -3,8 +3,6 @@
 
 #include "xrdebug.h"
 
-#include "dxerr.h"
-
 int (WINAPIV* __vsnprintf)(char *, size_t, const char*, va_list) = _vsnprintf;
 
 #pragma warning(push)
@@ -25,14 +23,8 @@ extern bool shared_str_initialized;
     #   define USE_BUG_TRAP
 #else
     #   define USE_BUG_TRAP
-    #	define DEBUG_INVOKE	__asm int 3
+    #	define DEBUG_INVOKE	__debugbreak()
         static BOOL			bException	= FALSE;
-#endif
-
-#ifndef _M_AMD64
-#	ifndef __BORLANDC__
-#		pragma comment(lib,"dxerr.lib")
-#	endif
 #endif
 
 #include <dbghelp.h>						// MiniDump flags
@@ -191,7 +183,7 @@ void gather_info		(const char *expression, const char *description, const char *
 		buffer			+= sprintf(buffer,"stack trace:%s%s",endline,endline);
 #endif // USE_OWN_ERROR_MESSAGE_WINDOW
 
-		BuildStackTrace	();		
+		BuildStackTrace	();
 
 		for (int i=2; i<g_stackTraceCount; ++i) {
 			if (shared_str_initialized)
@@ -290,19 +282,19 @@ void xrDebug::backend	(const char *expression, const char *description, const ch
 
 LPCSTR xrDebug::error2string	(long code)
 {
-	LPCSTR				result	= 0;
 	static	string1024	desc_storage;
+	string1024			system_message;
 
-#ifdef _M_AMD64
-#else
-	result				= DXGetErrorDescription	(code);
-#endif
-	if (0==result) 
-	{
-		FormatMessage	(FORMAT_MESSAGE_FROM_SYSTEM,0,code,0,desc_storage,sizeof(desc_storage)-1,0);
-		result			= desc_storage;
-	}
-	return		result	;
+	DWORD				length = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,0,code,0,system_message,sizeof(system_message)-1,0);
+	while (length && strchr(" \r\n.",system_message[length-1]))
+		system_message[--length]	= 0;
+
+	if (length)
+		sprintf_s		(desc_storage,sizeof(desc_storage),"%s (0x%08X)",system_message,u32(code));
+	else
+		sprintf_s		(desc_storage,sizeof(desc_storage),"0x%08X",u32(code));
+
+	return				desc_storage;
 }
 
 void xrDebug::error		(long hr, const char* expr, const char *file, int line, const char *function, bool &ignore_always)
@@ -454,8 +446,6 @@ please Submit Bug or save report and email it manually (button More...).\
 #if 1
 extern void BuildStackTrace(struct _EXCEPTION_POINTERS *pExceptionInfo);
 typedef LONG WINAPI UnhandledExceptionFilterType(struct _EXCEPTION_POINTERS *pExceptionInfo);
-typedef LONG ( __stdcall *PFNCHFILTFN ) ( EXCEPTION_POINTERS * pExPtrs ) ;
-extern "C" BOOL __stdcall SetCrashHandlerFilter ( PFNCHFILTFN pFn );
 
 static UnhandledExceptionFilterType	*previous_filter = 0;
 

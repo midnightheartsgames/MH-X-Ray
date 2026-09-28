@@ -17,7 +17,6 @@
 #include "resource.h"
 #include "LightAnimLibrary.h"
 #include "ispatial.h"
-#include "CopyProtection.h"
 #include <process.h>
 
 //---------------------------------------------------------------------
@@ -114,14 +113,12 @@ string512	g_sBenchmarkName;
 
 ENGINE_API	string512		g_sLaunchOnExit_params;
 ENGINE_API	string512		g_sLaunchOnExit_app;
-// -------------------------------------------
-// startup point
+
 void InitEngine		()
 {
 	Engine.Initialize			( );
 	while (!g_bIntroFinished)	Sleep	(100);
 	Device.Initialize			( );
-	CheckCopyProtection			( );
 }
 
 void InitSettings	()
@@ -219,10 +216,8 @@ void CheckPrivilegySlowdown		( )
 void Startup					( )
 {
 	execUserScript	();
-//.	InitInput		();
 	InitSound		();
 
-	// ...command line for auto start
 	{
 		LPCSTR	pStartup			= strstr				(Core.Params,"-start ");
 		if (pStartup)				Console->Execute		(pStartup+1);
@@ -239,24 +234,19 @@ void Startup					( )
 	g_pGamePersistent			= (IGame_Persistent*)	NEW_INSTANCE (CLSID_GAME_PERSISTANT);
 	g_SpatialSpace				= xr_new<ISpatial_DB>	();
 	g_SpatialSpacePhysic		= xr_new<ISpatial_DB>	();
-	
-	// Destroy LOGO
+
 	DestroyWindow				(logoWindow);
 	logoWindow					= NULL;
 
-	// Main cycle
-	CheckCopyProtection			( );
-Memory.mem_usage();
+	Memory.mem_usage			( );
 	Device.Run					( );
 
-	// Destroy APP
 	xr_delete					( g_SpatialSpacePhysic	);
 	xr_delete					( g_SpatialSpace		);
 	DEL_INSTANCE				( g_pGamePersistent		);
 	xr_delete					( pApp					);
 	Engine.Event.Dump			( );
 
-	// Destroying
 	destroySound();
 	destroyInput();
 
@@ -458,16 +448,10 @@ struct damn_keys_filter {
 #undef dwFilterKeysStructSize
 #undef dwToggleKeysStructSize
 
-// Приблудина для SecuROM-а
-#include "securom_api.h"
-
-// Фунция для тупых требований THQ и тупых американских пользователей
 BOOL IsOutOfVirtualMemory()
 {
 #define VIRT_ERROR_SIZE 256
 #define VIRT_MESSAGE_SIZE 512
-
-	SECUROM_MARKER_HIGH_SECURITY_ON(1)
 
 	MEMORYSTATUSEX statex;
 	DWORD dwPageFileInMB = 0;
@@ -485,7 +469,6 @@ BOOL IsOutOfVirtualMemory()
 	dwPageFileInMB = ( DWORD ) ( statex.ullTotalPageFile / ( 1024 * 1024 ) ) ;
 	dwPhysMemInMB = ( DWORD ) ( statex.ullTotalPhys / ( 1024 * 1024 ) ) ;
 
-	// Довольно отфонарное условие
 	if ( ( dwPhysMemInMB > 500 ) && ( ( dwPageFileInMB + dwPhysMemInMB ) > 2500  ) )
 		return 0;
 
@@ -498,8 +481,6 @@ BOOL IsOutOfVirtualMemory()
 		return 0;
 
 	MessageBox( NULL , pszMessage , pszError , MB_OK | MB_ICONHAND );
-
-	SECUROM_MARKER_HIGH_SECURITY_OFF(1)
 
 	return 1;
 }
@@ -987,8 +968,6 @@ void CApplication::LoadBegin	()
 		ll_hGeom2.create		(FVF::F_TL, RCache.Vertex.Buffer(),NULL);
 		phase_timer.Start	();
 		load_stage			= 0;
-
-		CheckCopyProtection	();
 	}
 }
 
@@ -1024,7 +1003,6 @@ void CApplication::LoadDraw		()
 	load_draw_internal			();
 
 	Device.End					();
-	CheckCopyProtection			();
 }
 
 void CApplication::LoadTitleInt(LPCSTR str)
@@ -1125,9 +1103,6 @@ void CApplication::Level_Set(u32 L)
 		hLevelLogo.create	("font", temp);
 	else
 		hLevelLogo.create	("font", "intro\\intro_no_start_picture");
-		
-
-	CheckCopyProtection		();
 }
 
 int CApplication::Level_ID(LPCSTR name)

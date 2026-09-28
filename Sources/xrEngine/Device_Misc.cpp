@@ -1,10 +1,5 @@
 #include "stdafx.h"
-#include "dxerr.h"
 
-// *****************************************************************************************
-// Error handling
-
-//----------------------------- FLAGS
 static struct _DF {
 	char *	name;
 	u32	mask;

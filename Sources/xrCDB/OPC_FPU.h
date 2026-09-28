@@ -106,37 +106,6 @@
 	inline_ bool IsNAN(float value)	{ return ((*(udword*)&value)&0x7f800000)==0x7f800000; }
 	#define	NaN(value) (!((value>=0) || (value<0)))
 
-/*
-	//! FPU precision setting function.
-	inline_ void SetFPU()
-	{
-		// This function evaluates whether the floating-point
-		// control word is set to single precision/round to nearest/
-		// exceptions disabled. If these conditions don't hold, the
-		// function changes the control word to set them and returns
-		// TRUE, putting the old control word value in the passback
-		// location pointed to by pwOldCW.
-		{
-			uword wTemp, wSave;
- 
-			__asm fstcw wSave
-			if (wSave & 0x300 ||            // Not single mode
-				0x3f != (wSave & 0x3f) ||   // Exceptions enabled
-				wSave & 0xC00)              // Not round to nearest mode
-			{
-				__asm
-				{
-					mov ax, wSave
-					and ax, not 300h    ;; single mode
-					or  ax, 3fh         ;; disable all exceptions
-					and ax, not 0xC00   ;; round to nearest mode
-					mov wTemp, ax
-					fldcw   wTemp
-				}
-			}
-		}
-	}
-*/
 	//! This function computes the slowest possible floating-point value (you can also directly use FLT_EPSILON)
 	inline_ float ComputeFloatEpsilon()
 	{
@@ -150,53 +119,6 @@
 		return x*x < epsilon;
 	}
 
-	#define FCOMI_ST0	_asm	_emit	0xdb	_asm	_emit	0xf0
-	#define FCOMIP_ST0	_asm	_emit	0xdf	_asm	_emit	0xf0
-	#define FCMOVB_ST0	_asm	_emit	0xda	_asm	_emit	0xc0
-	#define FCMOVNB_ST0	_asm	_emit	0xdb	_asm	_emit	0xc0
-
-	#define FCOMI_ST1	_asm	_emit	0xdb	_asm	_emit	0xf1
-	#define FCOMIP_ST1	_asm	_emit	0xdf	_asm	_emit	0xf1
-	#define FCMOVB_ST1	_asm	_emit	0xda	_asm	_emit	0xc1
-	#define FCMOVNB_ST1	_asm	_emit	0xdb	_asm	_emit	0xc1
-
-	#define FCOMI_ST2	_asm	_emit	0xdb	_asm	_emit	0xf2
-	#define FCOMIP_ST2	_asm	_emit	0xdf	_asm	_emit	0xf2
-	#define FCMOVB_ST2	_asm	_emit	0xda	_asm	_emit	0xc2
-	#define FCMOVNB_ST2	_asm	_emit	0xdb	_asm	_emit	0xc2
-
-	//! A global function to find MAX(a,b,c) using FCOMI/FCMOV
-/*	inline_ float FCMax3(float a, float b, float c)
-	{
-		float Res;
-		_asm	fld		[a]
-		_asm	fld		[b]
-		_asm	fld		[c]
-		FCOMI_ST1
-		FCMOVB_ST1
-		FCOMI_ST2
-		FCMOVB_ST2
-		_asm	fstp	[Res]
-		_asm	fcompp
-		return Res;
-	}
-
-	//! A global function to find MIN(a,b,c) using FCOMI/FCMOV
-	inline_ float FCMin3(float a, float b, float c)
-	{
-		float Res;
-		_asm	fld		[a]
-		_asm	fld		[b]
-		_asm	fld		[c]
-		FCOMI_ST1
-		FCMOVNB_ST1
-		FCOMI_ST2
-		FCMOVNB_ST2
-		_asm	fstp	[Res]
-		_asm	fcompp
-		return Res;
-	}
-*/
 	inline_ int ConvertToSortable(float f)
 	{
 		int& Fi = (int&)f;

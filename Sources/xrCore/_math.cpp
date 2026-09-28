@@ -16,112 +16,30 @@ XRCORE_API	Fmatrix			Fidentity;
 XRCORE_API	Dmatrix			Didentity;
 XRCORE_API	CRandom			Random;
 
-#ifdef _M_AMD64
-u16			getFPUsw()		{ return 0;	}
-
-namespace	FPU 
+namespace FPU
 {
-	XRCORE_API void 	m24		(void)	{
-		_control87	( _PC_24,   MCW_PC );
-		_control87	( _RC_CHOP, MCW_RC );
-	}
-	XRCORE_API void 	m24r	(void)	{
-		_control87	( _PC_24,   MCW_PC );
-		_control87	( _RC_NEAR, MCW_RC );
-	}
-	XRCORE_API void 	m53		(void)	{
-		_control87	( _PC_53,   MCW_PC );
-		_control87	( _RC_CHOP, MCW_RC );
-	}
-	XRCORE_API void 	m53r	(void)	{
-		_control87	( _PC_53,   MCW_PC );
-		_control87	( _RC_NEAR, MCW_RC );
-	}
-	XRCORE_API void 	m64		(void)	{
-		_control87	( _PC_64,   MCW_PC );
-		_control87	( _RC_CHOP, MCW_RC );
-	}
-	XRCORE_API void 	m64r	(void)	{
-		_control87	( _PC_64,   MCW_PC );
-		_control87	( _RC_NEAR, MCW_RC );
+	static void	set_x87_precision	(unsigned int precision)
+	{
+#ifdef _M_IX86
+		unsigned int	x87_control_word;
+		__control87_2	(precision | _RC_NEAR, _MCW_PC | _MCW_RC, &x87_control_word, NULL);
+#endif
 	}
 
-	void		initialize		()				{}
-};
-#else
-u16 getFPUsw() 
-{
-	u16		SW;
-	__asm	fstcw SW;
-	return	SW;
-}
-
-namespace FPU 
-{
-	u16			_24	=0;
-	u16			_24r=0;
-	u16			_53	=0;
-	u16			_53r=0;
-	u16			_64	=0;
-	u16			_64r=0;
-
-	XRCORE_API void 	m24		()	{
-		u16		p	= _24;
-		__asm fldcw p;	
-	}
-	XRCORE_API void 	m24r	()	{
-		u16		p	= _24r;
-		__asm fldcw p;  
-	}
-	XRCORE_API void 	m53		()	{
-		u16		p	= _53;
-		__asm fldcw p;	
-	}
-	XRCORE_API void 	m53r	()	{
-		u16		p	= _53r;
-		__asm fldcw p;	
-	}
-	XRCORE_API void 	m64		()	{ 
-		u16		p	= _64;
-		__asm fldcw p;	
-	}
-	XRCORE_API void 	m64r	()	{
-		u16		p	= _64r;
-		__asm fldcw p;  
-	}
+	XRCORE_API void 	m24r	()	{ set_x87_precision(_PC_24); }
+	XRCORE_API void 	m64r	()	{ set_x87_precision(_PC_64); }
 
 	void		initialize		()
 	{
 		_clear87	();
 
-		_control87	( _PC_24,   MCW_PC );
-		_control87	( _RC_CHOP, MCW_RC );
-		_24			= getFPUsw();	// 24, chop
-		_control87	( _RC_NEAR, MCW_RC );
-		_24r		= getFPUsw();	// 24, rounding
-
-		_control87	( _PC_53,   MCW_PC );
-		_control87	( _RC_CHOP, MCW_RC );
-		_53			= getFPUsw();	// 53, chop
-		_control87	( _RC_NEAR, MCW_RC );
-		_53r		= getFPUsw();	// 53, rounding
-
-		_control87	( _PC_64,   MCW_PC );
-		_control87	( _RC_CHOP, MCW_RC );
-		_64			= getFPUsw();	// 64, chop
-		_control87	( _RC_NEAR, MCW_RC );
-		_64r		= getFPUsw();	// 64, rounding
-
 #ifndef XRCORE_STATIC
-
 		m24r		();
-
-#endif	//XRCORE_STATIC
+#endif
 
 		::Random.seed	( u32(CPU::GetCLK()%(1i64<<32i64)) );
 	}
 };
-#endif
 
 namespace CPU 
 {
@@ -145,30 +63,18 @@ namespace CPU
 		return	_dest	;
 	}
 
-#ifdef M_BORLAND
-	u64	__fastcall GetCLK		(void)
-	{
-		_asm    db 0x0F;
-		_asm    db 0x31;
-	}
-#endif
-
 	void Detect	()
 	{
-		// General CPU identification
-		if (!_cpuid	(&ID))	
+		if (!_cpuid	(&ID))
 		{
-			// Core.Fatal		("Fatal error: can't detect CPU/FPU.");
 			abort				();
 		}
 
-		// Timers & frequency
 		u64			start,end;
 		u32			dwStart,dwTest;
 
 		SetPriorityClass		(GetCurrentProcess(),REALTIME_PRIORITY_CLASS);
 
-		// Detect Freq
 		dwTest	= timeGetTime();
 		do { dwStart = timeGetTime(); } while (dwTest==dwStart);
 		start	= GetCLK();
@@ -176,7 +82,6 @@ namespace CPU
 		end		= GetCLK();
 		clk_per_second = end-start;
 
-		// Detect RDTSC Overhead
 		clk_overhead	= 0;
 		u64 dummy		= 0;
 		for (int i=0; i<256; i++)	{
@@ -185,7 +90,6 @@ namespace CPU
 		}
 		clk_overhead		/=	256;
 
-		// Detect QPC Overhead
 		QueryPerformanceFrequency	((PLARGE_INTEGER)&qpc_freq)	;
 		qpc_overhead	= 0;
 		for (i=0; i<256; i++)	{
@@ -200,8 +104,7 @@ namespace CPU
 		clk_per_milisec	=	clk_per_second/1000;
 		clk_per_microsec	=	clk_per_milisec/1000;
 
-		_control87	( _PC_64,   MCW_PC );
-//		_control87	( _RC_CHOP, MCW_RC );
+		FPU::m64r	();
 		double a,b;
 		a = 1;		b = double(clk_per_second);
 		clk_to_seconds = float(double(a/b));

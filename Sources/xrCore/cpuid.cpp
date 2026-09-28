@@ -2,141 +2,41 @@
 #pragma hdrstop
 
 #include "cpuid.h"
+#include <intrin.h>
 
-#ifdef _M_AMD64
+static const u32 mmx_feature_bit		= 1u << 23;
+static const u32 sse_feature_bit		= 1u << 25;
+static const u32 sse2_feature_bit		= 1u << 26;
+static const u32 amd_3dnow_feature_bit	= 1u << 31;
 
-int _cpuid (_processor_info *pinfo)
-{
-	_processor_info&	P	= *pinfo;
-	strcpy				(P.v_name,		"AuthenticAMD");
-	strcpy				(P.model_name,	"AMD64 family");
-	P.family			=	8;
-	P.model				=	8;
-	P.stepping			=	0;
-	P.feature			=	_CPU_FEATURE_SSE | _CPU_FEATURE_SSE2;
-	P.os_support		=	_CPU_FEATURE_SSE | _CPU_FEATURE_SSE2;
-	return P.feature;
-}
-
-#else
-
-#ifdef	M_VISUAL
-#include "mmintrin.h"
-#endif
-
-// These are the bit flags that get set on calling cpuid
-// with register eax set to 1
-#define _MMX_FEATURE_BIT			0x00800000
-#define _SSE_FEATURE_BIT			0x02000000
-#define _SSE2_FEATURE_BIT			0x04000000
-
-// This bit is set when cpuid is called with
-// register set to 80000001h (only applicable to AMD)
-#define _3DNOW_FEATURE_BIT			0x80000000
- 
-int IsCPUID()
-{
-    __try {
-        _asm
-        {
-            xor eax, eax
-            cpuid
-        }
-    } __except ( EXCEPTION_EXECUTE_HANDLER) {
-        return 0;
-    }
-    return 1;
-}
-
-
-/***
-* int _os_support(int feature,...)
-*   - Checks if OS Supports the capablity or not
-****************************************************************/
-
-#ifdef M_VISUAL
-void _os_support(int feature, int& res)
-{
-
-    __try
-    {
-        switch (feature)
-        {
-        case _CPU_FEATURE_SSE:
-            __asm {
-                xorps xmm0, xmm0        // __asm _emit 0x0f __asm _emit 0x57 __asm _emit 0xc0
-                                        // executing SSE instruction
-            }
-            break;
-        case _CPU_FEATURE_SSE2:
-            __asm {
-                __asm _emit 0x66 __asm _emit 0x0f __asm _emit 0x57 __asm _emit 0xc0
-                                        // xorpd xmm0, xmm0
-                                        // executing WNI instruction
-            }
-            break;
-        case _CPU_FEATURE_3DNOW:
-            __asm 
-			{
-                __asm _emit 0x0f __asm _emit 0x0f __asm _emit 0xc0 __asm _emit 0x96 
-                                        // pfrcp mm0, mm0
-                                        // executing 3Dnow instruction
-            }
-            break;
-        case _CPU_FEATURE_MMX:
-            __asm 
-			{
-                pxor mm0, mm0           // executing MMX instruction
-            }
-            break;
-        }
-    } __except (EXCEPTION_EXECUTE_HANDLER) {
-		_mm_empty	();
-        return;
-    }
-	_mm_empty	();
-	res |= feature;
-}
-#endif
-
-#ifdef M_BORLAND
-// borland doesn't understand MMX/3DNow!/SSE/SSE2 asm opcodes
-void _os_support(int feature, int& res)
-{
-	res |= feature;
-}
-#endif
-
-
-/***
-*
-* void map_mname(int, int, const char *, char *) maps family and model to processor name
-*
-****************************************************/
+static const int standard_leaf			= 0;
+static const int feature_leaf			= 1;
+static const int extended_leaf			= int(0x80000000);
+static const int extended_feature_leaf	= int(0x80000001);
 
 void map_mname( int family, int model, const char * v_name, char *m_name)
 {
     if (!strncmp("AuthenticAMD", v_name, 12))
     {
-        switch (family) // extract family code
+        switch (family)
         {
-        case 4: // Am486/AM5x86
+        case 4:
             strcpy (m_name,"Am486");
             break;
 
-        case 5: // K6
-            switch (model) // extract model code
+        case 5:
+            switch (model)
             {
             case 0:		strcpy (m_name,"K5 Model 0");	break;
             case 1:		strcpy (m_name,"K5 Model 1");	break;
             case 2:		strcpy (m_name,"K5 Model 2");	break;
             case 3:		strcpy (m_name,"K5 Model 3");	break;
-            case 4:     break;	// Not really used
-            case 5:     break;  // Not really used
+            case 4:     break;
+            case 5:     break;
             case 6:		strcpy (m_name,"K6 Model 1");	break;
             case 7:		strcpy (m_name,"K6 Model 2");	break;
             case 8:		strcpy (m_name,"K6-2");			break;
-            case 9: 
+            case 9:
             case 10:
             case 11:
             case 12:
@@ -147,13 +47,13 @@ void map_mname( int family, int model, const char * v_name, char *m_name)
             }
             break;
 
-        case 6: // Athlon
-            switch(model)  // No model numbers are currently defined
+        case 6:
+            switch(model)
             {
             case 1:		strcpy (m_name,"ATHLON Model 1");	break;
 			case 2:		strcpy (m_name,"ATHLON Model 2");	break;
 			case 3:		strcpy (m_name,"DURON");			break;
-			case 4:	
+			case 4:
 			case 5:		strcpy (m_name,"ATHLON TB");		break;
 			case 6:		strcpy (m_name,"ATHLON XP");		break;
 			case 7:		strcpy (m_name,"DURON XP");			break;
@@ -163,10 +63,10 @@ void map_mname( int family, int model, const char * v_name, char *m_name)
         }
     } else if ( !strncmp("GenuineIntel", v_name, 12))
     {
-        switch (family) // extract family code
+        switch (family)
         {
         case 4:
-            switch (model) // extract model code
+            switch (model)
             {
             case 0:
             case 1:		strcpy (m_name,"i486DX");			break;
@@ -180,7 +80,7 @@ void map_mname( int family, int model, const char * v_name, char *m_name)
             }
             break;
         case 5:
-            switch (model) // extract model code
+            switch (model)
             {
             case 1:
             case 2:
@@ -190,146 +90,76 @@ void map_mname( int family, int model, const char * v_name, char *m_name)
             }
             break;
         case 6:
-            switch (model) // extract model code
+            switch (model)
             {
             case 1:		strcpy (m_name,"Pentium-Pro");		break;
             case 3:		strcpy (m_name,"Pentium-II");		break;
-            case 5:		strcpy (m_name,"Pentium-II");		break;  // actual differentiation depends on cache settings
+            case 5:		strcpy (m_name,"Pentium-II");		break;
             case 6:		strcpy (m_name,"Celeron");			break;
-            case 7:		strcpy (m_name,"Pentium-III");		break;  // actual differentiation depends on cache settings
+            case 7:		strcpy (m_name,"Pentium-III");		break;
 			case 8:		strcpy (m_name,"P3 Coppermine");	break;
             default:	strcpy (m_name,"P3 family");		break;
             }
             break;
 		case 15:
-			// F15/M2/S4 ???
 			switch (model)
 			{
 			case 2:		strcpy	(m_name,"Pentium 4");		break;
 			default:	strcpy	(m_name,"P4 family");		break;
 			}
         }
-    } else if ( !strncmp("CyrixInstead", v_name,12))
-    {
-        strcpy (m_name,"Unknown");
-    } else if ( !strncmp("CentaurHauls", v_name,12))
-    {
-        strcpy (m_name,"Unknown");
-    } else 
+    } else
     {
         strcpy (m_name, "Unknown");
     }
-
 }
-
-
-/***
-*
-* int _cpuid (_p_info *pinfo)
-* 
-* Entry:
-*
-*   pinfo: pointer to _p_info.
-*
-* Exit:
-*
-*   Returns int with capablity bit set even if pinfo = NULL
-*
-****************************************************/
-
 
 int _cpuid (_processor_info *pinfo)
 {
-    u32 dwStandard = 0;
-    u32 dwFeature = 0;
-    u32 dwMax = 0;
-    u32 dwExt = 0;
-    int feature = 0, os_support = 0;
-    union
-    {
-        char cBuf[12+1];
-        struct
-        {
-            u32 dw0;
-            u32 dw1;
-            u32 dw2;
-        };
-    } Ident;
+	int		registers[4];
 
-    if (!IsCPUID())
-    {
-        return 0;
-    }
+	__cpuid	(registers, standard_leaf);
+	int		max_standard_leaf	= registers[0];
 
-    _asm
-    {
-        push ebx
-        push ecx
-        push edx
+	char	vendor[12+1];
+	memcpy	(vendor + 0, &registers[1], 4);
+	memcpy	(vendor + 4, &registers[3], 4);
+	memcpy	(vendor + 8, &registers[2], 4);
+	vendor[12]	= 0;
 
-        // get the vendor string
-        xor eax,eax
-        cpuid
-        mov dwMax,eax
-        mov dword ptr Ident.dw0,ebx
-        mov dword ptr Ident.dw1,edx
-        mov dword ptr Ident.dw2,ecx
+	u32		standard	= 0;
+	u32		features	= 0;
+	if (max_standard_leaf >= feature_leaf)
+	{
+		__cpuid		(registers, feature_leaf);
+		standard	= u32(registers[0]);
+		features	= u32(registers[3]);
+	}
 
-        // get the Standard bits
-        mov eax,1
-        cpuid
-        mov dwStandard,eax
-        mov dwFeature,edx
+	u32		extended_features	= 0;
+	__cpuid	(registers, extended_leaf);
+	if (u32(registers[0]) >= u32(extended_feature_leaf))
+	{
+		__cpuid				(registers, extended_feature_leaf);
+		extended_features	= u32(registers[3]);
+	}
 
-        // get AMD-specials
-        mov eax,80000000h
-        cpuid
-        cmp eax,80000000h
-        jc notamd
-        mov eax,80000001h
-        cpuid
-        mov dwExt,edx
-
-notamd:
-        pop ecx
-        pop ebx
-        pop edx
-    }
-
-    if (dwFeature & _MMX_FEATURE_BIT)
-    {
-        feature |= _CPU_FEATURE_MMX;
-        _os_support(_CPU_FEATURE_MMX,os_support);
-    }
-    if (dwExt & _3DNOW_FEATURE_BIT)
-    {
-        feature |= _CPU_FEATURE_3DNOW;
-        _os_support(_CPU_FEATURE_3DNOW,os_support);
-    }
-    if (dwFeature & _SSE_FEATURE_BIT)
-    {
-        feature |= _CPU_FEATURE_SSE;
-        _os_support(_CPU_FEATURE_SSE,os_support);
-    }
-    if (dwFeature & _SSE2_FEATURE_BIT)
-    {
-        feature |= _CPU_FEATURE_SSE2;
-        _os_support(_CPU_FEATURE_SSE2,os_support);
-    }
+	int		feature	= 0;
+	if (features & mmx_feature_bit)				feature |= _CPU_FEATURE_MMX;
+	if (extended_features & amd_3dnow_feature_bit)	feature |= _CPU_FEATURE_3DNOW;
+	if (features & sse_feature_bit)				feature |= _CPU_FEATURE_SSE;
+	if (features & sse2_feature_bit)			feature |= _CPU_FEATURE_SSE2;
 
 	if (pinfo)
-    {
-        memset		(pinfo, 0, sizeof(_processor_info));
-        pinfo->os_support = os_support;
-        pinfo->feature = feature;
-        pinfo->family = (dwStandard >> 8)&0xF;  // retriving family
-        pinfo->model = (dwStandard >> 4)&0xF;   // retriving model
-        pinfo->stepping = (dwStandard) & 0xF;   // retriving stepping
-        Ident.cBuf[12] = 0;
-        strcpy		(pinfo->v_name, Ident.cBuf);
-        map_mname	(pinfo->family, pinfo->model, pinfo->v_name, pinfo->model_name);
-    }
-   return feature;
+	{
+		memset		(pinfo, 0, sizeof(_processor_info));
+		pinfo->os_support	= feature;
+		pinfo->feature		= feature;
+		pinfo->family		= (standard >> 8) & 0xF;
+		pinfo->model		= (standard >> 4) & 0xF;
+		pinfo->stepping		= standard & 0xF;
+		strcpy		(pinfo->v_name, vendor);
+		map_mname	(pinfo->family, pinfo->model, pinfo->v_name, pinfo->model_name);
+	}
+	return feature;
 }
-
-#endif
