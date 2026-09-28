@@ -198,7 +198,6 @@ public:
 			shared_str		level_name			(const shared_str &server_options) const;
 
 	void					create_direct_client();
-	BOOL					IsDedicated			() const	{return m_bDedicated;};
 
 	virtual void			Assign_ServerType	( string512& res ) {};
 	virtual bool			HasPassword			()	{ return false; }

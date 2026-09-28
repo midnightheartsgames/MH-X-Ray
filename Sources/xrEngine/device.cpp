@@ -24,7 +24,6 @@ ref_light	precache_light = 0;
 
 BOOL CRenderDevice::Begin	()
 {
-#ifndef DEDICATED_SERVER
 	HW.Validate		();
 	HRESULT	_hr		= HW.pDevice->TestCooperativeLevel();
     if (FAILED(_hr))
@@ -49,7 +48,6 @@ BOOL CRenderDevice::Begin	()
 	if (HW.Caps.SceneMode)	overdrawBegin	();
 	FPU::m24r	();
 	g_bRendering = 	TRUE;
-#endif
 	return		TRUE;
 }
 
@@ -68,7 +66,6 @@ extern void CheckPrivilegySlowdown();
 
 void CRenderDevice::End		(void)
 {
-#ifndef DEDICATED_SERVER
 
 	VERIFY	(HW.pDevice);
 
@@ -104,7 +101,6 @@ void CRenderDevice::End		(void)
 	HRESULT _hr		= HW.pDevice->Present( NULL, NULL, NULL, NULL );
 	if				(D3DERR_DEVICELOST==_hr)	return;			// we will handle this later
 	//R_ASSERT2		(SUCCEEDED(_hr),	"Presentation failed. Driver upgrade needed?");
-#endif
 }
 
 
@@ -140,9 +136,6 @@ void 			mt_Thread	(void *ptr)	{
 void CRenderDevice::PreCache	(u32 amount)
 {
 	if (HW.Caps.bForceGPU_REF)	amount=0;
-#ifdef DEDICATED_SERVER
-	amount = 0;
-#endif
 	// Msg			("* PCACHE: start for %d...",amount);
 	dwPrecacheFrame	= dwPrecacheTotal = amount;
 	if(amount && !precache_light && g_pGameLevel)
@@ -157,7 +150,6 @@ void CRenderDevice::PreCache	(u32 amount)
 }
 
 
-int g_svDedicateServerUpdateReate = 100;
 
 ENGINE_API xr_list<LOADING_EVENT>			g_loading_events;
 
@@ -207,9 +199,6 @@ void CRenderDevice::Run			()
         {
 			if (b_is_Ready) {
 
-#ifdef DEDICATED_SERVER
-				u32 FrameStartTime = TimerGlobal.GetElapsed_ms();
-#endif
 				if (psDeviceFlags.test(rsStatistic))	g_bEnableStatGather	= TRUE;
 				else									g_bEnableStatGather	= FALSE;
 				if(g_loading_events.size())
@@ -247,7 +236,6 @@ void CRenderDevice::Run			()
 				mt_csEnter.Leave			();
 				Sleep						(0);
 
-#ifndef DEDICATED_SERVER
 				Statistic->RenderTOTAL_Real.FrameStart	();
 				Statistic->RenderTOTAL_Real.Begin		();
 				if (b_is_Active)							{
@@ -262,7 +250,6 @@ void CRenderDevice::Run			()
 				Statistic->RenderTOTAL_Real.End			();
 				Statistic->RenderTOTAL_Real.FrameEnd	();
 				Statistic->RenderTOTAL.accum	= Statistic->RenderTOTAL_Real.accum;
-#endif
 				// *** Suspend threads
 				// Capture startup point
 				// Release end point - allow thread to wait for startup point
@@ -276,36 +263,6 @@ void CRenderDevice::Run			()
 					Device.seqParallel.clear_not_free	();
 					seqFrameMT.Process					(rp_Frame);
 				}
-#ifdef DEDICATED_SERVER
-				u32 FrameEndTime = TimerGlobal.GetElapsed_ms();
-				u32 FrameTime = (FrameEndTime - FrameStartTime);
-				/*
-				string1024 FPS_str = "";
-				string64 tmp;
-				strcat(FPS_str, "FPS Real - ");
-				if (dwTimeDelta != 0)
-					strcat(FPS_str, ltoa(1000/dwTimeDelta, tmp, 10));
-				else
-					strcat(FPS_str, "~~~");
-
-				strcat(FPS_str, ", FPS Proj - ");
-				if (FrameTime != 0)
-					strcat(FPS_str, ltoa(1000/FrameTime, tmp, 10));
-				else
-					strcat(FPS_str, "~~~");
-				
-*/
-				u32 DSUpdateDelta = 1000/g_svDedicateServerUpdateReate;
-				if (FrameTime < DSUpdateDelta)
-				{
-					Sleep(DSUpdateDelta - FrameTime);
-//					Msg("sleep for %d", DSUpdateDelta - FrameTime);
-//					strcat(FPS_str, ", sleeped for ");
-//					strcat(FPS_str, ltoa(DSUpdateDelta - FrameTime, tmp, 10));
-				}
-
-//				Msg(FPS_str);
-#endif
 
 			} else {
 				Sleep		(100);
@@ -379,7 +336,6 @@ void CRenderDevice::Pause(BOOL bOn, BOOL bTimer, BOOL bSound, LPCSTR reason)
 	Msg("pause [%s] timer=[%s] sound=[%s] reason=%s",bOn?"ON":"OFF", bTimer?"ON":"OFF", bSound?"ON":"OFF", reason);
 #endif // DEBUG
 
-#ifndef DEDICATED_SERVER	
 
 	if(bOn)
 	{
@@ -416,7 +372,6 @@ void CRenderDevice::Pause(BOOL bOn, BOOL bTimer, BOOL bSound, LPCSTR reason)
 		}
 	}
 
-#endif
 
 }
 
@@ -441,9 +396,7 @@ void CRenderDevice::OnWM_Activate(WPARAM wParam, LPARAM lParam)
 		if (Device.b_is_Active)	
 		{
 			Device.seqAppActivate.Process(rp_AppActivate);
-#ifndef DEDICATED_SERVER
 				ShowCursor			(FALSE);
-#endif
 		}else	
 		{
 			Device.seqAppDeactivate.Process(rp_AppDeactivate);

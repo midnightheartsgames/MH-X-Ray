@@ -23,9 +23,7 @@ LRESULT CALLBACK WndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 				if (Device.b_is_Active)	
 				{
 					Device.seqAppActivate.Process(rp_AppActivate);
-#ifndef		DEDICATED_SERVER
 						ShowCursor			(FALSE);
-#endif
 				}else	
 				{
 					Device.seqAppDeactivate.Process(rp_AppDeactivate);

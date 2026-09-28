@@ -323,7 +323,7 @@ namespace std{
 		FATAL		("Out of memory.");
     }
 
-    void	xrDebug::_initialize		(const bool &dedicated)
+    void	xrDebug::_initialize		()
     {
 //        std::set_new_mode 				(1);					// gen exception if can't allocate memory
         std::set_new_handler			(def_new_handler  );	// exception-handler for 'out of memory' condition
@@ -334,7 +334,7 @@ namespace std{
     _CRTIMP int		__cdecl _set_new_mode( int );
     _CRTIMP _PNH	__cdecl _set_new_handler( _PNH );
 
-    void	xrDebug::_initialize		(const bool &dedicated)
+    void	xrDebug::_initialize		()
     {
 		handler							= 0;
         _set_new_mode					(1);					// gen exception if can't allocate memory

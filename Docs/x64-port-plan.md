@@ -114,7 +114,12 @@ FPS: разброс между прогонами подряд большой (R
 После каждого среза: сборка, деплой, `smoke.ps1 -Baseline` для R1 и R2, коммит.
 
 - **1.0 Кодировка (выполнен 2026-09-28).** Файлы движка вне `Externals` переведены из Windows-1251/1252 в UTF-8 с BOM (раздел 1.4). Кодировку определял по доле букв; 9 файлов, которые эвристика приняла за CP866, оказались Windows-1252. Идентификаторы с кириллицей переименованы в ASCII. В `git diff` только перекодировка и эти переименования; сборка и `smoke.ps1` проходят. В `AGENTS.md` правило о побайтовой правке заменено правилом про UTF-8 с BOM.
-- **1.1 Dedicated server.** Удалить конфигурации `*_Dedicated` из `X-Ray.sln` и всех `.vcxproj`, проект `xrD3D9-Null`, блоки `DEDICATED_SERVER`, глобальный флаг `g_dedicated_server` (объявлен в `xrEngine/IGame_Persistent.h`) и его ветки.
+- **1.1 Dedicated server (выполнен 2026-09-28).**
+  - Удалены конфигурации `*_Dedicated` (`X-Ray.sln`, `xrEngine.vcxproj`, `X-Ray.props`), проект `xrD3D9-Null`, блоки `DEDICATED_SERVER` (14 файлов xrEngine).
+  - Удалён флаг `g_dedicated_server`: ≈ 118 мест, в обычной сборке он всегда был `false`.
+  - Удалены текстовая консоль `CTextConsole`, команды `net_dedicated_sleep`, `sv_dedicated_server_update_rate` и `sv_console_update_rate`, параметр `Dedicated` у `IPureServer` и параметр `dedicated` у `xrDebug::_initialize`.
+  - `mm_mm_net_srv_dedicated` — настройка MP-меню, уходит в срезе 1.3.
+- **Эталоны smoke при удалении консольных команд.** `user.ltx` хранит значения всех команд, поэтому удалённая команда даёт в логе `! Unknown command: <имя>`. Это ожидаемо. После среза сравнить новые строки `!` со списком удалённых команд и, если лишнего нет, обновить `Output\Smoke\baseline-r1.log` и `baseline-r2.log`. Строки исчезнут сами, когда игра перезапишет `user.ltx` при обычном выходе.
 - **1.2 GameSpy, BattlEye, CD-key, патчер, браузер серверов.** Проект `xrGameSpy`, папка `xrGame/gamespy`, `Level_GameSpy_Funcs.cpp`, `xr_Server_BattlEye.cpp`, `ui/ServerList*`, `ui/UIListItemServer*`, `ui/UICDkey*`. Связанные вызовы в `MainMenu.*`, `Level*.cpp`, `xrServer*.cpp`, `console_commands.cpp`.
 - **1.3 MP-режимы и MP-интерфейс.** `game_cl_mp*`, `game_sv_mp*`, `*deathmatch*`, `*teamdeathmatch*`, `*artefacthunt*`; MP-UI (покупка, статистика, фраги, голосование, чат, выбор скина и точки спавна, ранги, деньги); их Lua-экспорт; регистрация в `object_factory_register.cpp:189-197` — оставить только `game_sv_Single` и `game_cl_Single`.
 - **1.4 Сетевой транспорт.** В `xrNetServer` оставить только in-process direct connect. Удалить DirectPlay, `Externals/DXSDK_Aug2007`, `NET_Compressor` (работает только при `!psNET_direct_connect`), сам флаг `psNET_direct_connect` и ключ `-no_direct_connect`. Убрать подключение dplay из `xrEngine/stdafx.h`.

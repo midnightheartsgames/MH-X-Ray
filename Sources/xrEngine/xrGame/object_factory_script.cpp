@@ -58,12 +58,10 @@ void CObjectFactory::register_script_class			(LPCSTR unknown_class, LPCSTR clsid
 	);
 }
 
-ENGINE_API	bool g_dedicated_server;
 
 void CObjectFactory::register_script_classes()
 {
-	if (!g_dedicated_server)
-		ai();
+	ai();
 }
 
 using namespace luabind;

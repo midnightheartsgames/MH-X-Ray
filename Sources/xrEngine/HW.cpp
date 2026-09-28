@@ -35,11 +35,7 @@ void CHW::Reset		(HWND hwnd)
 	_RELEASE			(pBaseRT);
 
 #ifndef _EDITOR
-#ifndef DEDICATED_SERVER
 	BOOL	bWindowed		= !psDeviceFlags.is	(rsFullscreen);
-#else
-	BOOL	bWindowed		= TRUE;
-#endif
 
 	selectResolution		(DevPP.BackBufferWidth, DevPP.BackBufferHeight, bWindowed);
 	// Windoze
@@ -70,11 +66,7 @@ xr_token*				vid_mode_token = NULL;
 
 void CHW::CreateD3D	()
 {
-#ifndef DEDICATED_SERVER
 	LPCSTR		_name			= "d3d9.dll";
-#else
-	LPCSTR		_name			= "xrd3d9-null.dll";
-#endif
 
 	hD3D9            			= LoadLibrary(_name);
 	R_ASSERT2	           	 	(hD3D9,"Can't find 'd3d9.dll'\nPlease install latest version of DirectX before running this program");
@@ -148,10 +140,6 @@ void	CHW::DestroyDevice	()
 void	CHW::selectResolution	(u32 &dwWidth, u32 &dwHeight, BOOL bWindowed)
 {
 	fill_vid_mode_list			(this);
-#ifdef DEDICATED_SERVER
-	dwWidth		= 640;
-	dwHeight	= 480;
-#else
 	if(bWindowed)
 	{
 		dwWidth		= psCurrentVidMode[0];
@@ -172,7 +160,6 @@ void	CHW::selectResolution	(u32 &dwWidth, u32 &dwHeight, BOOL bWindowed)
 		dwHeight					= psCurrentVidMode[1];
 #endif
 	}
-#endif
 
 }
 
@@ -181,11 +168,7 @@ void		CHW::CreateDevice		(HWND m_hWnd)
 	CreateD3D				();
 
 	// General - select adapter and device
-#ifdef DEDICATED_SERVER
-	BOOL  bWindowed			= TRUE;
-#else
 	BOOL  bWindowed			= !psDeviceFlags.is(rsFullscreen);
-#endif
 
 	DevAdapter				= D3DADAPTER_DEFAULT;
 	DevT					= Caps.bForceGPU_REF?D3DDEVTYPE_REF:D3DDEVTYPE_HAL;
@@ -423,11 +406,7 @@ BOOL	CHW::support	(D3DFORMAT fmt, DWORD type, DWORD usage)
 
 void	CHW::updateWindowProps	(HWND m_hWnd)
 {
-#ifndef DEDICATED_SERVER
 	BOOL	bWindowed				= !psDeviceFlags.is	(rsFullscreen);
-#else
-	BOOL	bWindowed				= TRUE;
-#endif
 
 	u32		dwWindowStyle			= 0;
 	if (bWindowed && psDeviceFlags.is(rsBorderless))	{
@@ -453,9 +432,6 @@ void	CHW::updateWindowProps	(HWND m_hWnd)
 		BOOL			bCenter = FALSE;
 		if (strstr(Core.Params, "-center_screen"))	bCenter = TRUE;
 
-#ifdef DEDICATED_SERVER
-		bCenter			= TRUE;
-#endif
 
 		if(bCenter){
 			RECT				DesktopRect;
@@ -490,10 +466,8 @@ void	CHW::updateWindowProps	(HWND m_hWnd)
 		SetWindowLong			( m_hWnd, GWL_STYLE, dwWindowStyle=(WS_POPUP|WS_VISIBLE) );
 	}
 
-#ifndef DEDICATED_SERVER
 		ShowCursor	(FALSE);
 		SetForegroundWindow( m_hWnd );
-#endif
 }
 
 

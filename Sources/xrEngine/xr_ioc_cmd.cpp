@@ -463,11 +463,7 @@ public:
 
 	virtual void	Execute	(LPCSTR args)
 	{
-#ifdef DEDICATED_SERVER
-		inherited::Execute	("renderer_r1");
-#else
 		inherited::Execute	(args);
-#endif // DEDICATED_SERVER
 
 		psDeviceFlags.set	(rsR2, (renderer_value>0) );
 		r2_sun_static =		(renderer_value!=2);
@@ -491,7 +487,6 @@ extern int			psNET_ClientUpdate;
 extern int			psNET_ClientPending;
 extern int			psNET_ServerUpdate;
 extern int			psNET_ServerPending;
-extern int			psNET_DedicatedSleep;
 extern char			psNET_Name[32];
 extern Flags32		psEnvFlags;
 extern float		r__dtex_range;
@@ -574,7 +569,6 @@ void CCC_Register()
 
 	// Texture manager	
 	CMD4(CCC_Integer,	"texture_lod",			&psTextureLOD,				0,	4	);
-	CMD4(CCC_Integer,	"net_dedicated_sleep",	&psNET_DedicatedSleep,		0,	64	);
 
 	// General video control
 	CMD1(CCC_VidMode,	"vid_mode"				);
@@ -635,13 +629,5 @@ if(strstr(Core.Params,"designer"))
 }
 	CMD1(CCC_DumpResources,		"dump_resources");
 	CMD1(CCC_DumpOpenFiles,		"dump_open_files");
-//#endif
-
-
-	extern int g_svTextConsoleUpdateRate;
-	CMD4(CCC_Integer, "sv_console_update_rate", &g_svTextConsoleUpdateRate, 1, 100);
-
-	extern int g_svDedicateServerUpdateReate;
-	CMD4(CCC_Integer, "sv_dedicated_server_update_rate", &g_svDedicateServerUpdateReate, 1, 1000);
 };
  

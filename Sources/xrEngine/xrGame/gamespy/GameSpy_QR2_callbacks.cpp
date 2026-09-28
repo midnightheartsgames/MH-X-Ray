@@ -69,7 +69,7 @@ void __cdecl callback_serverkey(int keyid, void* outbuf, void *userdata)
 		break;
 	case HOSTPORT_KEY:		pQR2->BufferAdd_Int(outbuf, pServer->GetPort()); break;
 
-	case DEDICATED_KEY:		pQR2->BufferAdd_Int(outbuf, pServer->IsDedicated());		break;
+	case DEDICATED_KEY:		pQR2->BufferAdd_Int(outbuf, 0);		break;
 	case GAMETYPE_NAME_KEY: ADD_KEY_VAL(pServer->game, pQR2, BufferAdd_Int, outbuf, Type()); break; //pQR2->BufferAdd_Int(outbuf, pServer->game->Type()); break;
 	case NUMTEAMS_KEY:		ADD_KEY_VAL(gmMP, pQR2, BufferAdd_Int, outbuf, GetNumTeams()); break; //pQR2->BufferAdd_Int(outbuf, gmMP->GetNumTeams()); break;		
 	case G_MAX_PING_KEY:	pQR2->BufferAdd_Int(outbuf, g_sv_dwMaxClientPing); break;
@@ -119,13 +119,7 @@ void __cdecl callback_playerkey(int keyid, int index, void* outbuf, void *userda
 
 	xrGameSpyClientData* pCD = NULL;
 	
-	if (pServer->IsDedicated())
-	{
-		if (u32(index+1) >= pServer->client_Count()) return;
-		pCD = (xrGameSpyClientData*)pServer->client_Get(index+1);
-	}
-	else
-		pCD = (xrGameSpyClientData*)pServer->client_Get(index);
+	pCD = (xrGameSpyClientData*)pServer->client_Get(index);
 	if (!pCD || !pCD->ps) return;
 
 	switch (keyid)

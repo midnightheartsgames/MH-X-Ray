@@ -241,7 +241,7 @@ bool xr_stdcall net_start_finalizer()
 		{
 			MainMenu()->OnLoadError("BattlEye/BEServer.dll");
 		}else
-		if(g_connect_server_err==xrServer::ErrConnect && !psNET_direct_connect && !g_dedicated_server) 
+		if(g_connect_server_err==xrServer::ErrConnect && !psNET_direct_connect) 
 		{
 			MainMenu()->SwitchToMultiplayerMenu();
 		}else
@@ -279,11 +279,8 @@ bool CLevel::net_start6()
 			Console->Execute		(buf);
 		}
 
-		if	(!g_dedicated_server)
-		{
-			if (g_hud)
-				HUD().GetUI()->OnConnected();
-		}
+		if (g_hud)
+			HUD().GetUI()->OnConnected();
 	}
 
 	return false;

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <PropertyGroup Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Debug_Dedicated'">
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
 
     <LinkIncremental>true</LinkIncremental>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
 
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)'=='Mixed' Or '$(Configuration)'=='Mixed_Dedicated' Or '$(Configuration)'=='Release' Or '$(Configuration)'=='Release_Dedicated'">
+  <PropertyGroup Condition="'$(Configuration)'=='Mixed' Or '$(Configuration)'=='Release'">
 
     <LinkIncremental>false</LinkIncremental>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
@@ -39,26 +39,26 @@
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
     </ClCompile>
 
-    <ClCompile Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Debug_Dedicated'">
+    <ClCompile Condition="'$(Configuration)'=='Debug'">
       <!-- MultiProcessorCompilation несовместим с LinkIncremental и UseDebugLibraries -->
       <MultiProcessorCompilation>false</MultiProcessorCompilation>
       <Optimization>Disabled</Optimization>
     </ClCompile>
 
-    <ClCompile Condition="'$(Configuration)'=='Mixed' Or '$(Configuration)'=='Mixed_Dedicated'">
+    <ClCompile Condition="'$(Configuration)'=='Mixed'">
       <!-- Optimization = Disabled - принудительное отключение оптимизации -->
       <!-- Оптимизация включается автоматически, когда UseDebugLibraries = false -->
       <Optimization>MaxSpeed</Optimization>
     </ClCompile>
 
-    <ClCompile Condition="'$(Configuration)'=='Mixed' Or '$(Configuration)'=='Mixed_Dedicated' Or '$(Configuration)'=='Release' Or '$(Configuration)'=='Release_Dedicated'">
+    <ClCompile Condition="'$(Configuration)'=='Mixed' Or '$(Configuration)'=='Release'">
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
 
-    <ClCompile Condition="'$(Configuration)'=='Release' Or '$(Configuration)'=='Release_Dedicated'">
+    <ClCompile Condition="'$(Configuration)'=='Release'">
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -72,11 +72,11 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
 
-    <Link Condition="'$(Configuration)'=='Mixed' Or '$(Configuration)'=='Mixed_Dedicated'">
+    <Link Condition="'$(Configuration)'=='Mixed'">
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
 
-    <Link Condition="'$(Configuration)'=='Release' Or '$(Configuration)'=='Release_Dedicated'">
+    <Link Condition="'$(Configuration)'=='Release'">
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <OptimizeReferences>true</OptimizeReferences>

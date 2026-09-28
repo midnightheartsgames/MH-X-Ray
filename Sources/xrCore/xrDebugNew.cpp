@@ -400,11 +400,11 @@ void CALLBACK PreErrorHandler	(INT_PTR)
 }
 
 #ifdef USE_BUG_TRAP
-void SetupExceptionHandler	(const bool &dedicated)
+void SetupExceptionHandler	()
 {
 	BT_InstallSehFilter		();
 #ifndef USE_OWN_ERROR_MESSAGE_WINDOW
-	if (!dedicated && !strstr(GetCommandLine(),"-silent_error_mode"))
+	if (!strstr(GetCommandLine(),"-silent_error_mode"))
 		BT_SetActivityType	(BTA_SHOWUI);
 	else
 		BT_SetActivityType	(BTA_SAVEREPORT);
@@ -679,7 +679,7 @@ LONG WINAPI UnhandledFilter	(_EXCEPTION_POINTERS *pExceptionInfo)
 		FATAL		("Out of memory.");
     }
 
-    void	xrDebug::_initialize		(const bool &dedicated)
+    void	xrDebug::_initialize		()
     {
 		handler							= 0;
 		m_on_dialog						= 0;
@@ -861,7 +861,7 @@ LONG WINAPI UnhandledFilter	(_EXCEPTION_POINTERS *pExceptionInfo)
 		handler_base					("termination with exit code 3");
 	}
 
-    void	xrDebug::_initialize		(const bool &dedicated)
+    void	xrDebug::_initialize		()
     {
 		debug_on_thread_spawn			();
 
@@ -887,7 +887,7 @@ LONG WINAPI UnhandledFilter	(_EXCEPTION_POINTERS *pExceptionInfo)
 #endif
 
 #ifdef USE_BUG_TRAP
-		SetupExceptionHandler			(dedicated);
+		SetupExceptionHandler			();
 #endif // USE_BUG_TRAP
 		previous_filter					= ::SetUnhandledExceptionFilter(UnhandledFilter);	// exception handler to all "unhandled" exceptions
 

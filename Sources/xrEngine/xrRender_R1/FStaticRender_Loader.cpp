@@ -57,24 +57,19 @@ void CRender::level_Load(IReader *fs)
 
 	marker						= 0;
 
-	if	(!g_dedicated_server)	{
-		// VB,IB,SWI
-		g_pGamePersistent->LoadTitle("st_loading_geometry");
-		CStreamReader				*geom = FS.rs_open	("$level$","level.geom");
-		LoadBuffers					(geom);
-		LoadSWIs					(geom);
-		FS.r_close					(geom);
+	g_pGamePersistent->LoadTitle("st_loading_geometry");
+	CStreamReader				*geom = FS.rs_open	("$level$","level.geom");
+	LoadBuffers					(geom);
+	LoadSWIs					(geom);
+	FS.r_close					(geom);
 
-		// Visuals
-		g_pGamePersistent->LoadTitle("st_loading_spatial_db");
-		chunk						= fs->open_chunk(fsL_VISUALS);
-		LoadVisuals					(chunk);
-		chunk->close				();
+	g_pGamePersistent->LoadTitle("st_loading_spatial_db");
+	chunk						= fs->open_chunk(fsL_VISUALS);
+	LoadVisuals					(chunk);
+	chunk->close				();
 
-		// Details
-		g_pGamePersistent->LoadTitle("st_loading_details");
-		Details->Load				();
-	}
+	g_pGamePersistent->LoadTitle("st_loading_details");
+	Details->Load				();
 	
 	// Sectors
 	g_pGamePersistent->LoadTitle("st_loading_sectors_portals");

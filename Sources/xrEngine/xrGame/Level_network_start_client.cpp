@@ -140,14 +140,11 @@ bool	CLevel::net_start_client5				()
 		// HUD
 
 		// Textures
-		if	(!g_dedicated_server)
-		{
-			pHUD->Load							();
-			g_pGamePersistent->LoadTitle				("st_loading_textures");
-			Device.Resources->DeferredLoad		(FALSE);
-			Device.Resources->DeferredUpload	();
-			LL_CheckTextures					();
-		}
+		pHUD->Load							();
+		g_pGamePersistent->LoadTitle				("st_loading_textures");
+		Device.Resources->DeferredLoad		(FALSE);
+		Device.Resources->DeferredUpload	();
+		LL_CheckTextures					();
 	}
 	return true;
 }
