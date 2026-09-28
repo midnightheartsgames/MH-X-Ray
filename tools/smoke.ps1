@@ -28,6 +28,7 @@ New-Item -ItemType Directory -Force -Path $resultDir | Out-Null
 $overrides = [ordered]@{
     'renderer'         = "renderer_$Renderer"
     'rs_fullscreen'    = 'off'
+    'rs_borderless'    = 'off'
     'vid_mode'         = '1280x720'
     'snd_volume_eff'   = '0'
     'snd_volume_music' = '0'

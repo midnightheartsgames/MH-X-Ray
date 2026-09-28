@@ -423,25 +423,31 @@ BOOL	CHW::support	(D3DFORMAT fmt, DWORD type, DWORD usage)
 
 void	CHW::updateWindowProps	(HWND m_hWnd)
 {
-//	BOOL	bWindowed				= strstr(Core.Params,"-dedicated") ? TRUE : !psDeviceFlags.is	(rsFullscreen);
 #ifndef DEDICATED_SERVER
 	BOOL	bWindowed				= !psDeviceFlags.is	(rsFullscreen);
 #else
 	BOOL	bWindowed				= TRUE;
 #endif
-	
+
 	u32		dwWindowStyle			= 0;
-	// Set window properties depending on what mode were in.
-	if (bWindowed)		{
+	if (bWindowed && psDeviceFlags.is(rsBorderless))	{
+		SetWindowLong			( m_hWnd, GWL_STYLE, WS_POPUP|WS_VISIBLE );
+
+		MONITORINFO				monitor_info;
+		monitor_info.cbSize		= sizeof(monitor_info);
+		GetMonitorInfo			( MonitorFromWindow(m_hWnd,MONITOR_DEFAULTTOPRIMARY), &monitor_info );
+
+		const RECT&				monitor = monitor_info.rcMonitor;
+		SetWindowPos			(	m_hWnd,
+									HWND_TOP,
+									monitor.left,
+									monitor.top,
+									monitor.right - monitor.left,
+									monitor.bottom - monitor.top,
+									SWP_SHOWWINDOW|SWP_NOCOPYBITS|SWP_FRAMECHANGED );
+	}
+	else if (bWindowed)		{
 		SetWindowLong	( m_hWnd, GWL_STYLE, dwWindowStyle=(WS_BORDER|WS_DLGFRAME|WS_VISIBLE|WS_SYSMENU|WS_MINIMIZEBOX ) );
-		// When moving from fullscreen to windowed mode, it is important to
-		// adjust the window size after recreating the device rather than
-		// beforehand to ensure that you get the window size you want.  For
-		// example, when switching from 640x480 fullscreen to windowed with
-		// a 1000x600 window on a 1024x768 desktop, it is impossible to set
-		// the window size to 1000x600 until after the display mode has
-		// changed to 1024x768, because windows cannot be larger than the
-		// desktop.
 
 		RECT			m_rcWindowBounds;
 		BOOL			bCenter = FALSE;
