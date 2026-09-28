@@ -9,3 +9,5 @@ Output/
 # Файлы
 # Files
 *.vcxproj.user
+# Python
+__pycache__/

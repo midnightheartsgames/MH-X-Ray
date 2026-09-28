@@ -6,7 +6,8 @@ param(
     [int]$Seconds = 30,
     [int]$TimeoutSeconds = 300,
     [string]$GameDir = (Join-Path $PSScriptRoot '..\..\S.T.A.L.K.E.R. Shadow of Chernobyl'),
-    [string]$Baseline
+    [string]$Baseline,
+    [switch]$Menu
 )
 
 $ErrorActionPreference = 'Stop'
@@ -38,7 +39,8 @@ $smokeConfig = @($userConfig | Where-Object { $overrides.Keys -notcontains ($_ -
 $smokeConfig += $overrides.GetEnumerator() | ForEach-Object { "$($_.Key) $($_.Value)" }
 [System.IO.File]::WriteAllLines((Join-Path $appData 'smoke.ltx'), [string[]]$smokeConfig, $latin1)
 
-$arguments = "-nointro -silent_error_mode -ltx smoke.ltx -smoke_test $Seconds -start server($Save/single/alife/load) client(localhost)"
+$arguments = "-nointro -silent_error_mode -ltx smoke.ltx -smoke_test $Seconds"
+if (-not $Menu) { $arguments += " -start server($Save/single/alife/load) client(localhost)" }
 $startTime = Get-Date
 $process = Start-Process -FilePath $engine -ArgumentList $arguments -WorkingDirectory $GameDir -PassThru
 $null = $process.Handle
@@ -71,7 +73,7 @@ $fatal = $logLines | Where-Object { $_ -match 'FATAL ERROR|stack trace' }
 if ($fatal) { $failures.Add("fatal markers in log: $($fatal | Select-Object -First 3)") }
 
 $smokeLine = $logLines | Where-Object { $_ -like '* smoke_test:*' } | Select-Object -Last 1
-if ($log -and -not $smokeLine) { $failures.Add('level did not load and run for the requested time (no smoke_test line)') }
+if ($log -and -not $smokeLine) { $failures.Add('game did not reach the tested state for the requested time (no smoke_test line)') }
 
 $fps = '-'
 if ($smokeLine -match 'smoke_test: \d+ frames in \d+ ms, ([\d.]+) fps, (\d+) inactive frames') {
@@ -90,7 +92,7 @@ $crashReports = Get-ChildItem -Path $logDir |
     Where-Object { $_.Name -notlike 'xray_*.log' -and $_.LastWriteTime -ge $startTime }
 
 Write-Output "renderer : $Renderer"
-Write-Output "save     : $Save"
+Write-Output "target   : $(if ($Menu) { 'main menu' } else { $Save })"
 Write-Output "exit     : $(if ($exited) { $process.ExitCode } else { 'killed' })"
 Write-Output "elapsed  : $elapsed s"
 Write-Output "fps      : $fps"

@@ -896,28 +896,57 @@ class CSmokeTest
 	u32				m_duration_ms;
 	u32				m_start_frame;
 	u32				m_inactive_frames;
+	bool			m_configured;
+	bool			m_enabled;
+	bool			m_menu_mode;
 	bool			m_armed;
 	bool			m_measuring;
+	bool			m_finished;
 	CTimerBase		m_timer;
-public:
-					CSmokeTest		() : m_duration_ms(0), m_start_frame(0), m_inactive_frames(0), m_armed(false), m_measuring(false) {}
 
-	void			arm				()
+	void			configure		()
 	{
+		m_configured				= true;
 		LPCSTR		key				= "-smoke_test ";
 		LPCSTR		value			= strstr(Core.Params,key);
-		m_armed						= (0!=value);
-		m_measuring					= false;
-		if (!m_armed)
+		m_enabled					= (0!=value);
+		if (!m_enabled)
 			return;
 
 		m_duration_ms				= u32(atoi(value+xr_strlen(key)))*1000;
+		m_menu_mode					= (0==strstr(Core.Params,"-start "));
+	}
+
+	bool			menu_active		() const
+	{
+		return		g_pGamePersistent && g_pGamePersistent->m_pMainMenu && g_pGamePersistent->m_pMainMenu->IsActive();
+	}
+public:
+					CSmokeTest		() : m_duration_ms(0), m_start_frame(0), m_inactive_frames(0), m_configured(false), m_enabled(false), m_menu_mode(false), m_armed(false), m_measuring(false), m_finished(false) {}
+
+	void			arm				()
+	{
+		if (!m_configured)
+			configure				();
+		if (!m_enabled || m_finished)
+			return;
+
+		m_armed						= true;
+		m_measuring					= false;
 		if (!Device.b_is_Active)
 			Device.OnWM_Activate	(WA_ACTIVE,0);
 	}
 
 	void			update			()
 	{
+		if (!m_configured)
+			configure				();
+		if (!m_enabled || m_finished)
+			return;
+
+		if (!m_armed && m_menu_mode && menu_active())
+			arm						();
+
 		if (!m_armed || Device.dwPrecacheFrame)
 			return;
 
@@ -939,6 +968,7 @@ public:
 		u32			frames			= Device.dwFrame-m_start_frame;
 		Msg							("* smoke_test: %u frames in %u ms, %.1f fps, %u inactive frames",frames,elapsed_ms,float(frames)*1000.f/float(elapsed_ms),m_inactive_frames);
 		m_armed						= false;
+		m_finished					= true;
 		Console->Execute			("quit");
 	}
 }	SmokeTest;
