@@ -1,4 +1,4 @@
-////////////////////////////////////////////////////////////////////////////
+п»ї////////////////////////////////////////////////////////////////////////////
 //	Module 		: ai_stalker_events.cpp
 //	Created 	: 26.02.2003
 //  Modified 	: 26.02.2003
@@ -144,7 +144,7 @@ void CAI_Stalker::UpdateAvailableDialogs(CPhraseDialogManager* partner)
 		for(KNOWN_INFO_VECTOR::const_iterator it = CInventoryOwner::m_known_info_registry->registry().objects_ptr()->begin();
 			CInventoryOwner::m_known_info_registry->registry().objects_ptr()->end() != it; ++it)
 		{
-			//подгрузить кусочек информации с которым мы работаем
+			//РїРѕРґРіСЂСѓР·РёС‚СЊ РєСѓСЃРѕС‡РµРє РёРЅС„РѕСЂРјР°С†РёРё СЃ РєРѕС‚РѕСЂС‹Рј РјС‹ СЂР°Р±РѕС‚Р°РµРј
 			CInfoPortion info_portion;
 			info_portion.Load((*it).id);
 

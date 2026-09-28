@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "../../../sound_player.h"
 
@@ -23,7 +23,7 @@ void CStatePoltergeistAttackHiddenAbstract::initialize()
 TEMPLATE_SPECIALIZATION
 void CStatePoltergeistAttackHiddenAbstract::execute()
 {
-	// ïðîâåðèòü íà çàâåðøåíèå ïóòè
+	// Ð¿Ñ€Ð¾Ð²ÐµÑ€Ð¸Ñ‚ÑŒ Ð½Ð° Ð·Ð°Ð²ÐµÑ€ÑˆÐµÐ½Ð¸Ðµ Ð¿ÑƒÑ‚Ð¸
 	if (object->control().path_builder().detail().time_path_built() > time_state_started) {
 		if (object->control().path_builder().is_path_end(DIST_TO_PATH_END)) select_target_point();
 	}

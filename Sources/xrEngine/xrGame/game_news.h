@@ -1,4 +1,4 @@
-#pragma once
+п»ї#pragma once
 
 #include "alife_space.h"
 #include "string_table_defs.h"
@@ -27,7 +27,7 @@ struct GAME_NEWS_DATA : public IPureSerializeObject<IReader,IWriter>
 	LPCSTR				SingleLineText();
 
 private:
-	//полный текст новостей, формируется при первом обращении
+	//РїРѕР»РЅС‹Р№ С‚РµРєСЃС‚ РЅРѕРІРѕСЃС‚РµР№, С„РѕСЂРјРёСЂСѓРµС‚СЃСЏ РїСЂРё РїРµСЂРІРѕРј РѕР±СЂР°С‰РµРЅРёРё
 	xr_string full_news_text;
 
 };

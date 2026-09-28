@@ -1,4 +1,4 @@
-#include "stdafx.h"
+п»ї#include "stdafx.h"
 #include "radioactivezone.h"
 #include "hudmanager.h"
 #include "level.h"
@@ -29,7 +29,7 @@ bool  CRadioactiveZone::BlowoutState	()
 
 void CRadioactiveZone::Affect(SZoneObjectInfo* O) 
 {
-	// вермя срабатывания не чаще, чем заданный период
+	// РІРµСЂРјСЏ СЃСЂР°Р±Р°С‚С‹РІР°РЅРёСЏ РЅРµ С‡Р°С‰Рµ, С‡РµРј Р·Р°РґР°РЅРЅС‹Р№ РїРµСЂРёРѕРґ
 	if(m_dwDeltaTime < m_dwPeriod) return;
 //.	m_dwDeltaTime = 0;
 	

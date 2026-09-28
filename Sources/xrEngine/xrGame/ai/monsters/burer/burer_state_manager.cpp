@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "burer.h"
 #include "burer_state_manager.h"
 
@@ -53,7 +53,7 @@ void CStateManagerBurer::execute()
 
 	select_state(state); 
 	
-	// âûïîëíèòü òåêóùåå ñîñòîÿíèå
+	// Ğ²Ñ‹Ğ¿Ğ¾Ğ»Ğ½Ğ¸Ñ‚ÑŒ Ñ‚ĞµĞºÑƒÑ‰ĞµĞµ ÑĞ¾ÑÑ‚Ğ¾ÑĞ½Ğ¸Ğµ
 	get_state_current()->execute();
 
 	prev_substate = current_substate;

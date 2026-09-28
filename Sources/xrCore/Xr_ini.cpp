@@ -1,4 +1,4 @@
-#include "stdafx.h"
+п»ї#include "stdafx.h"
 #pragma hdrstop
 
 #include "fs_internal.h"
@@ -23,7 +23,7 @@ bool item_pred(const CInifile::Item& x, LPCSTR val)
 }
 
 //------------------------------------------------------------------------------
-//Тело функций Inifile
+//РўРµР»Рѕ С„СѓРЅРєС†РёР№ Inifile
 //------------------------------------------------------------------------------
 XRCORE_API void _parse(LPSTR dest, LPCSTR src)
 {

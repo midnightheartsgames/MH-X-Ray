@@ -1,4 +1,4 @@
-// exxZERO Time Stamp AddIn. Document modified at : Thursday, March 07, 2002 14:13:00 , by user : Oles , from computer : OLES
+п»ї// exxZERO Time Stamp AddIn. Document modified at : Thursday, March 07, 2002 14:13:00 , by user : Oles , from computer : OLES
 // HUDCursor.cpp: implementation of the CHUDTarget class.
 //
 //////////////////////////////////////////////////////////////////////
@@ -89,7 +89,7 @@ ICF static BOOL pick_trace_callback(collide::rq_result& result, LPVOID params)
 		*RQ				= result;
 		return FALSE;
 	}else{
-		//получить треугольник и узнать его материал
+		//РїРѕР»СѓС‡РёС‚СЊ С‚СЂРµСѓРіРѕР»СЊРЅРёРє Рё СѓР·РЅР°С‚СЊ РµРіРѕ РјР°С‚РµСЂРёР°Р»
 		CDB::TRI* T		= Level().ObjectSpace.GetStaticTris()+result.element;
 		if (GMLib.GetMaterialByIdx(T->material)->Flags.is(SGameMtl::flPassable)) 
 			return TRUE;
@@ -233,7 +233,7 @@ void CHUDTarget::Render()
 		clamp(fuzzyShowInfo,0.f,1.f);
 	}
 
-	//отрендерить кружочек или крестик
+	//РѕС‚СЂРµРЅРґРµСЂРёС‚СЊ РєСЂСѓР¶РѕС‡РµРє РёР»Рё РєСЂРµСЃС‚РёРє
 	if(!m_bShowCrosshair){
 		// actual rendering
 		u32			vOffset;
@@ -265,7 +265,7 @@ void CHUDTarget::Render()
 		RCache.set_Geometry	(hGeom);
 		RCache.Render		(D3DPT_TRIANGLELIST,vOffset,0,4,0,2);
 	}else{
-		//отрендерить прицел
+		//РѕС‚СЂРµРЅРґРµСЂРёС‚СЊ РїСЂРёС†РµР»
 		HUDCrosshair.cross_color	= C;
 		HUDCrosshair.OnRender		();
 	}

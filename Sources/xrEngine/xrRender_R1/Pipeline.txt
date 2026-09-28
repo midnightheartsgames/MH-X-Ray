@@ -1,4 +1,4 @@
-hw-cull:
+п»їhw-cull:
 	1. divide into two parts:
 			untested(occluder), tested(occludee)
 			
@@ -43,7 +43,7 @@ input:
 	pixel:
 		t_diff		=	tex(diffuse)
 		t_lmap		=	tex(lmap)
-		light		=	t_lmap.rgb * lmap_color + diffuse.rgb(hemi + фонарик) + specular.rgb(sun)*t_lmap.a
+		light		=	t_lmap.rgb * lmap_color + diffuse.rgb(hemi + С„РѕРЅР°СЂРёРє) + specular.rgb(sun)*t_lmap.a
 		out			:=	(t_diff * light)x2;
 
 -------------------------------------------------------------------------------

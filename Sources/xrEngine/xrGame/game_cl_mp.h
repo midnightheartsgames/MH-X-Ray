@@ -1,4 +1,4 @@
-#pragma once
+п»ї#pragma once
 
 #include "game_cl_base.h"
 #include "script_export_space.h"
@@ -34,7 +34,7 @@ struct SND_Message{
 
 struct cl_TeamStruct
 {
-	shared_str			caSection;		// имя секции комманды
+	shared_str			caSection;		// РёРјСЏ СЃРµРєС†РёРё РєРѕРјРјР°РЅРґС‹
 	//-----------------------------------
 	ref_shader			IndicatorShader;
 	ref_shader			InvincibleShader;

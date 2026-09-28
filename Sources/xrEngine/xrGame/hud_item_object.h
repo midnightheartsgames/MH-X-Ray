@@ -1,4 +1,4 @@
-////////////////////////////////////////////////////////////////////////////
+п»ї////////////////////////////////////////////////////////////////////////////
 //	Module 		: hud_item_object.h
 //	Created 	: 24.03.2003
 //  Modified 	: 27.12.2004
@@ -15,7 +15,7 @@ class CHudItemObject :
 		public CInventoryItemObject,
 		public CHudItem
 {
-protected: //чтоб нельзя было вызвать на прямую
+protected: //С‡С‚РѕР± РЅРµР»СЊР·СЏ Р±С‹Р»Рѕ РІС‹Р·РІР°С‚СЊ РЅР° РїСЂСЏРјСѓСЋ
 						CHudItemObject		();
 	virtual				~CHudItemObject		();
 

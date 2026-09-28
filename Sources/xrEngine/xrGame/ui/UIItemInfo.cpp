@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 
 #include "uiiteminfo.h"
 #include "uistatic.h"
@@ -181,7 +181,7 @@ void CUIItemInfo::InitItem(CInventoryItem* pInvItem)
 	}
 	if(UIItemImage)
 	{
-		// Çàãðóæàåì êàðòèíêó
+		// Ð—Ð°Ð³Ñ€ÑƒÐ¶Ð°ÐµÐ¼ ÐºÐ°Ñ€Ñ‚Ð¸Ð½ÐºÑƒ
 		UIItemImage->SetShader				(InventoryUtilities::GetEquipmentIconsShader());
 
 		int iGridWidth						= pInvItem->GetGridWidth();

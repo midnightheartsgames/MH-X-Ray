@@ -1,4 +1,4 @@
-#include "stdafx.h"
+п»ї#include "stdafx.h"
 #include "UIXmlInit.h"
 #include "../hudmanager.h"
 #include "../UI.h"
@@ -140,7 +140,7 @@ bool CUIXmlInit::InitFrameWindow(CUIXml& xml_doc, LPCSTR path,
 
 	if(*tex_name) pWnd->InitLeftBottom(*tex_name, x,y);
 */
-	//инициализировать заголовок окна
+	//РёРЅРёС†РёР°Р»РёР·РёСЂРѕРІР°С‚СЊ Р·Р°РіРѕР»РѕРІРѕРє РѕРєРЅР°
 	strconcat(sizeof(buf),buf,path,":title");
 	if(xml_doc.NavigateToNode(buf,index)) InitStatic(xml_doc, buf, index, pWnd->UITitleText);
 	

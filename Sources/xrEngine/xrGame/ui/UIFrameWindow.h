@@ -1,4 +1,4 @@
-#pragma once
+п»ї#pragma once
 
 #include "uiwindow.h"
 
@@ -31,7 +31,7 @@ public:
 	virtual void	Draw						();
 	virtual void	Update						();
 	
-	//текст заголовка
+	//С‚РµРєСЃС‚ Р·Р°РіРѕР»РѕРІРєР°
 	CUIStatic*		UITitleText;
 	CUIStatic*		GetTitleStatic				()										{return UITitleText;};
 	void			SetVisiblePart				(CUIFrameRect::EFramePart p, BOOL b)	{m_UIWndFrame.SetVisiblePart(p,b);};

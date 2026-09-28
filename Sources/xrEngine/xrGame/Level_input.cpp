@@ -1,4 +1,4 @@
-#include "stdafx.h"
+п»ї#include "stdafx.h"
 #include <dinput.h>
 #include "HUDmanager.h"
 #include "../xr_ioconsole.h"
@@ -91,7 +91,7 @@ public:
 	}}
 }	vtune	;
 
-// Обработка нажатия клавиш
+// РћР±СЂР°Р±РѕС‚РєР° РЅР°Р¶Р°С‚РёСЏ РєР»Р°РІРёС€
 extern bool g_block_pause;
 
 void CLevel::IR_OnKeyboardPress	(int key)
