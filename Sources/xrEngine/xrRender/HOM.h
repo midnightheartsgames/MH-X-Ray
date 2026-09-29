@@ -58,5 +58,6 @@ public:
 #ifdef DEBUG
 	virtual void			OnRender	();
 			void			stats		();
+			void			reset_skip	();
 #endif
 };

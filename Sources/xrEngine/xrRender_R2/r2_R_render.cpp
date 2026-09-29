@@ -184,6 +184,9 @@ void CRender::render_menu	()
 }
 
 extern u32 g_r;
+#ifdef DEBUG
+extern void r_vis_capture_flush();
+#endif
 void CRender::Render		()
 {
 	g_r						= 1;
@@ -385,8 +388,10 @@ void CRender::Render		()
 	// Lighting, dependant on OCCQ
 	render_lights							(LP_pending);
 
-	// Postprocess
 	Target->phase_combine					();
+#ifdef DEBUG
+	r_vis_capture_flush						();
+#endif
 	VERIFY	(0==mapDistort.size());
 }
 

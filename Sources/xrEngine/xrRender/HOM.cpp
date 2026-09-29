@@ -375,6 +375,13 @@ void CHOM::OnRender	()
 		}
 	}
 }
+void CHOM::reset_skip()
+{
+	if (!m_pModel)	return;
+	for (int it=0; it<m_pModel->get_tris_count(); it++)
+		m_pTris[it].skip	= 0;
+}
+
 void CHOM::stats()
 {
 	if (m_pModel){

@@ -470,6 +470,9 @@
     <ClCompile Include="..\xrRender\r__sector_traversal.cpp">
       <Filter>Visibility\Sector/Portal</Filter>
     </ClCompile>
+    <ClCompile Include="..\xrRender\r__vis_audit.cpp">
+      <Filter>Visibility\Sector/Portal</Filter>
+    </ClCompile>
     <ClCompile Include="..\xrRender\HOM.cpp">
       <Filter>Visibility\HOM Occlusion</Filter>
     </ClCompile>

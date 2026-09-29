@@ -201,6 +201,31 @@ public:
 		RImplementation.Models->dump();
 	}
 };
+#ifdef DEBUG
+extern void r_vis_audit(float step, u32 yaws, u32 rays_x, u32 rays_y);
+extern void r_vis_capture_request(LPCSTR name);
+class CCC_VisCapture : public IConsole_Command
+{
+public:
+	CCC_VisCapture(LPCSTR N) : IConsole_Command(N)  { };
+	virtual void Execute(LPCSTR args) {
+		r_vis_capture_request	(args);
+	}
+};
+class CCC_VisAudit : public IConsole_Command
+{
+public:
+	CCC_VisAudit(LPCSTR N) : IConsole_Command(N)  { bEmptyArgsHandled = TRUE; };
+	virtual void Execute(LPCSTR args) {
+		float	step	= 8.f;
+		u32		yaws	= 8;
+		u32		rays_x	= 48;
+		u32		rays_y	= 27;
+		sscanf	(args,"%f %u %u %u",&step,&yaws,&rays_x,&rays_y);
+		r_vis_audit	(step,yaws,rays_x,rays_y);
+	}
+};
+#endif
 //-----------------------------------------------------------------------
 class	CCC_Preset		: public CCC_Token
 {
@@ -255,6 +280,8 @@ void		xrRender_initconsole	()
 	CMD4(CCC_Float,		"r__wallmark_shift_v",	&ps_r__WallmarkSHIFT_V,		0.0f,	1.f		);
 	CMD4(CCC_Float,		"r__wallmark_ttl",		&ps_r__WallmarkTTL,			1.0f,	5.f*60.f);
 	CMD1(CCC_ModelPoolStat,"stat_models"		);
+	CMD1(CCC_VisAudit,	"r__vis_audit"			);
+	CMD1(CCC_VisCapture,"r__vis_capture"		);
 #endif // DEBUG
 
 //	CMD4(CCC_Integer,	"r__supersample",		&ps_r__Supersample,			1,		4		);

@@ -283,6 +283,7 @@
     <ClCompile Include="..\xrRender\ParticleGroup.cpp" />
     <ClCompile Include="..\xrRender\r__sector.cpp" />
     <ClCompile Include="..\xrRender\r__sector_traversal.cpp" />
+    <ClCompile Include="..\xrRender\r__vis_audit.cpp" />
     <ClCompile Include="..\xrRender\HOM.cpp" />
     <ClCompile Include="..\xrRender\occRasterizer.cpp" />
     <ClCompile Include="..\xrRender\occRasterizer_core.cpp" />

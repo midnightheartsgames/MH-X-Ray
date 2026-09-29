@@ -888,12 +888,62 @@ class CSmokeTest
 	string64		m_jump_level;
 	bool			m_jumped;
 
+	struct SCommand
+	{
+		u32			delay_ms;
+		string256	text;
+	};
+	xr_vector<SCommand>	m_commands;
+	u32				m_next_command;
+
 	static void		read_word_option(LPCSTR key, string64 &value)
 	{
 		value[0]					= 0;
 		LPCSTR		found			= strstr(Core.Params,key);
 		if (found)
 			sscanf					(found+xr_strlen(key),"%63[^ ]",value);
+	}
+
+	void			read_commands	(LPCSTR key)
+	{
+		LPCSTR		found			= strstr(Core.Params,key);
+		if (!found)
+			return;
+		found						+= xr_strlen(key);
+		LPCSTR		end				= strstr(found," -");
+		u32			length			= end ? u32(end-found) : xr_strlen(found);
+		string512	value;
+		strncpy_s					(value,sizeof(value),found,_min(length,u32(sizeof(value)-1)));
+
+		for (LPSTR cursor=value; cursor; )
+		{
+			LPSTR		separator		= strchr(cursor,';');
+			if (separator)
+				*separator++			= 0;
+			while (' '==*cursor)
+				++cursor;
+			SCommand	command;
+			command.delay_ms			= 0;
+			if ('@'==*cursor)
+			{
+				command.delay_ms		= u32(atof(cursor+1)*1000.f);
+				cursor					= strchr(cursor,' ');
+				while (cursor && ' '==*cursor)
+					++cursor;
+			}
+			if (cursor && *cursor)
+			{
+				strcpy_s				(command.text,sizeof(command.text),cursor);
+				m_commands.push_back	(command);
+			}
+			cursor						= separator;
+		}
+	}
+
+	void			run_commands	(u32 elapsed_ms)
+	{
+		for (; m_next_command<m_commands.size() && m_commands[m_next_command].delay_ms<=elapsed_ms; ++m_next_command)
+			Console->Execute		(m_commands[m_next_command].text);
 	}
 
 	void			configure		()
@@ -910,6 +960,7 @@ class CSmokeTest
 
 		read_word_option			("-smoke_save ",m_save_name);
 		read_word_option			("-smoke_jump ",m_jump_level);
+		read_commands				("-smoke_exec ");
 	}
 
 	bool			menu_active		() const
@@ -917,7 +968,7 @@ class CSmokeTest
 		return		g_pGamePersistent && g_pGamePersistent->m_pMainMenu && g_pGamePersistent->m_pMainMenu->IsActive();
 	}
 public:
-					CSmokeTest		() : m_duration_ms(0), m_start_frame(0), m_inactive_frames(0), m_configured(false), m_enabled(false), m_menu_mode(false), m_armed(false), m_measuring(false), m_finished(false), m_jumped(false) { m_save_name[0] = 0; m_jump_level[0] = 0; }
+					CSmokeTest		() : m_duration_ms(0), m_start_frame(0), m_inactive_frames(0), m_configured(false), m_enabled(false), m_menu_mode(false), m_armed(false), m_measuring(false), m_finished(false), m_jumped(false), m_next_command(0) { m_save_name[0] = 0; m_jump_level[0] = 0; }
 
 	void			arm				()
 	{
@@ -946,6 +997,8 @@ public:
 			return;
 
 		if (!m_measuring) {
+			m_next_command			= 0;
+			run_commands			(0);
 			m_measuring				= true;
 			m_start_frame			= Device.dwFrame;
 			m_inactive_frames		= 0;
@@ -957,6 +1010,7 @@ public:
 			++m_inactive_frames;
 
 		u32			elapsed_ms		= m_timer.GetElapsed_ms();
+		run_commands				(elapsed_ms);
 		if (elapsed_ms<m_duration_ms)
 			return;
 

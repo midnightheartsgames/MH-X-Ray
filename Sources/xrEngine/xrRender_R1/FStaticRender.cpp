@@ -494,6 +494,9 @@ void	CRender::rmNormal	()
 }
 
 extern u32 g_r;
+#ifdef DEBUG
+extern void r_vis_capture_flush();
+#endif
 void	CRender::Render		()
 {
 	g_r											= 1;
@@ -533,6 +536,9 @@ void	CRender::Render		()
 
 	// Postprocess, if necessary
 	Target->End									();
+#ifdef DEBUG
+	r_vis_capture_flush							();
+#endif
 	if (L_Projector) L_Projector->finalize		();
 
 	// HUD
