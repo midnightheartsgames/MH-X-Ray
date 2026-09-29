@@ -10,8 +10,20 @@ unsigned short int mbhMulti2Wide
 	( wide_char *WideStr , wide_char *WidePos , const unsigned short int WideStrSize , const char *MultiStr  ){return 0;};
 #endif
 
-extern ENGINE_API BOOL g_bRendering; 
+extern ENGINE_API BOOL g_bRendering;
 ENGINE_API Fvector2		g_current_font_scale={1.0f,1.0f};
+
+static const float		largest_font_set_screen_height	= 1200.f;
+
+float CGameFont::WidthScale	() const
+{
+	return _max(1.f, float(Device.dwHeight)/largest_font_set_screen_height);
+}
+
+float CGameFont::HeightScale	() const
+{
+	return (uFlags&fsDeviceIndependent) ? 1.f : WidthScale();
+}
 
 CGameFont::CGameFont(LPCSTR section, u32 flags)
 {
@@ -165,8 +177,9 @@ void CGameFont::OnRender()
 		uFlags			|= fsValid;
 	}
 
+	const float	width_scale	= WidthScale();
+
 	for (u32 i=0; i<strings.size(); ){
-		// calculate first-fit
 		int		count	=	1;
 
 		int length = smart_strlen( strings[ i ].string );
@@ -181,12 +194,10 @@ void CGameFont::OnRender()
 			else		break;
 		}
 
-		// lock AGP memory
 		u32	vOffset;
 		FVF::TL* v		= (FVF::TL*)RCache.Vertex.Lock	(length*4,pGeom.stride(),vOffset);
 		FVF::TL* start	= v;
 
-		// fill vertices
 		u32 last		= i+count;
 		for (; i<last; i++) {
 			String		&PS	= strings[i];
@@ -233,7 +244,7 @@ void CGameFont::OnRender()
 
 					l = IsMultibyte() ? GetCharTC( wsStr[ 1 + j ] ) : GetCharTC( ( u16 ) ( u8 ) PS.string[j] );
 
-					float scw		= l.z * g_current_font_scale.x;
+					float scw		= l.z * g_current_font_scale.x * width_scale;
 
 					float fTCWidth	= l.z/vTS.x;
 
@@ -249,15 +260,14 @@ void CGameFont::OnRender()
 					}
 					X += scw * vInterval.x;
 					if ( IsMultibyte() ) {
-						X -= 2;
+						X -= 2 * width_scale;
 						if ( IsNeedSpaceCharacter( wsStr[ 1 + j ] ) )
-							X += fXStep;
+							X += fXStep * width_scale;
 					}
 				}
 			}
 		}
 
-		// Unlock and draw
 		u32 vCount = (u32)(v-start);
 		RCache.Vertex.Unlock		(vCount,pGeom.stride());
 		if (vCount){
@@ -274,6 +284,7 @@ u16 CGameFont::GetCutLengthPos( float fTargetWidth , const char * pszText )
 
 	wide_char wsStr[ MAX_MB_CHARS ], wsPos[ MAX_MB_CHARS ];
 	float fCurWidth = 0.0f , fDelta = 0.0f;
+	const float width_scale = WidthScale();
 
 	u16	len	= mbhMulti2Wide( wsStr , wsPos , MAX_MB_CHARS , pszText );
 
@@ -283,6 +294,8 @@ u16 CGameFont::GetCutLengthPos( float fTargetWidth , const char * pszText )
 
 		if ( IsNeedSpaceCharacter( wsStr[ i ] ) )
 			fDelta += fXStep;
+
+		fDelta *= width_scale;
 
 		if ( ( fCurWidth + fDelta ) > fTargetWidth )
 			break;
@@ -300,6 +313,7 @@ u16 CGameFont::SplitByWidth( u16 * puBuffer , u16 uBufferSize , float fTargetWid
 	wide_char wsStr[ MAX_MB_CHARS ] , wsPos[ MAX_MB_CHARS ];
 	float fCurWidth = 0.0f , fDelta = 0.0f;
 	u16 nLines = 0;
+	const float width_scale = WidthScale();
 
 	u16	len	= mbhMulti2Wide( wsStr , wsPos , MAX_MB_CHARS , pszText );
 
@@ -310,12 +324,13 @@ u16 CGameFont::SplitByWidth( u16 * puBuffer , u16 uBufferSize , float fTargetWid
 		if ( IsNeedSpaceCharacter( wsStr[ i ] ) )
 			fDelta += fXStep;
 
-		if ( 
-				( ( fCurWidth + fDelta ) > fTargetWidth ) && // overlength
-				( ! IsBadStartCharacter( wsStr[ i ] ) ) && // can start with this character
-				( i < len ) && // is not the last character
-				( ( i > 1 ) && ( ! IsBadEndCharacter( wsStr[ i - 1 ] ) ) ) // && // do not stop the string on a "bad" character
-//				( ( i > 1 ) && ( ! ( ( IsAlphaCharacter( wsStr[ i - 1 ] ) ) && (  IsAlphaCharacter( wsStr[ i ] ) ) ) ) ) // do not split numbers or words
+		fDelta *= width_scale;
+
+		if (
+				( ( fCurWidth + fDelta ) > fTargetWidth ) &&
+				( ! IsBadStartCharacter( wsStr[ i ] ) ) &&
+				( i < len ) &&
+				( ( i > 1 ) && ( ! IsBadEndCharacter( wsStr[ i - 1 ] ) ) )
 		) {
 			fCurWidth = fDelta;
 			VERIFY( nLines < uBufferSize );
@@ -339,7 +354,7 @@ void CGameFont::MasterOut(
 	rs.x = ( bUseCoords ? ( bScaleCoords ? ( DI2PX( _x ) ) : _x ) : fCurrentX );
 	rs.y = ( bUseCoords ? ( bScaleCoords ? ( DI2PY( _y ) ) : _y ) : fCurrentY );
 	rs.c = dwCurrentColor;
-	rs.height = fCurrentHeight;
+	rs.height = fCurrentHeight * HeightScale();
 	rs.align = eCurrentAlignment;
 
 	int vs_sz = _vsnprintf( rs.string , sizeof( rs.string ) - 1 , fmt , p );
@@ -391,7 +406,7 @@ float CGameFont::SizeOf_( const char cChar )
 {
 	VERIFY( ! IsMultibyte() );
 
-	return ( ( GetCharTC( ( u16 ) ( u8 ) cChar ).z * vInterval.x ) );
+	return ( GetCharTC( ( u16 ) ( u8 ) cChar ).z * vInterval.x * WidthScale() );
 }
 
 float CGameFont::SizeOf_( LPCSTR s )
@@ -412,7 +427,7 @@ float CGameFont::SizeOf_( LPCSTR s )
 	if (len)
 		for (int j=0; j<len; j++)
 			X			+= GetCharTC( ( u16 ) ( u8 ) s[ j ] ).z;
-	return				(X*vInterval.x/**vTS.x*/);
+	return				(X*vInterval.x*WidthScale());
 }
 
 float CGameFont::SizeOf_( const wide_char *wsStr )
@@ -431,12 +446,12 @@ float CGameFont::SizeOf_( const wide_char *wsStr )
 			X += fDelta;
 		}
 
-	return ( X * vInterval.x );
+	return ( X * vInterval.x * WidthScale() );
 }
 
 float CGameFont::CurrentHeight_	()
 {
-	return fCurrentHeight * vInterval.y;
+	return fCurrentHeight * HeightScale() * vInterval.y;
 }
 
 void CGameFont::SetHeightI(float S)

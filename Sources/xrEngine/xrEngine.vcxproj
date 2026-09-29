@@ -91,6 +91,9 @@
       </AdditionalLibraryDirectories>
       <ImportLibrary>$(xrLibraries)$(ProjectName).lib</ImportLibrary>
     </Link>
+    <Manifest>
+      <EnableDpiAwareness>true</EnableDpiAwareness>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
     <Midl>

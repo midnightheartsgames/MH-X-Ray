@@ -62,6 +62,8 @@ public:
 
 protected:
 	IC const Fvector&		GetCharTC		(u16 c)		{return TCMap[c];}
+	float					WidthScale		() const;
+	float					HeightScale		() const;
 
 public:
 							CGameFont		(LPCSTR section, u32 flags=0);

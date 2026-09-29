@@ -38,16 +38,17 @@ BOOL CRenderTarget::Create	()
 	curWidth			= Device.dwWidth;
 	curHeight			= Device.dwHeight;
 
-	// Select mode to operate in
+	D3DCAPS9			caps;
+	R_CHK				(HW.pDevice->GetDeviceCaps(&caps));
+
 	float	amount		= ps_r__Supersample?float(ps_r__Supersample):1	;
 	float	scale		= _sqrt	(amount);
-	rtWidth				= clampr(iFloor(scale*Device.dwWidth  + .5f), 128, 2048);
-	rtHeight			= clampr(iFloor(scale*Device.dwHeight + .5f), 128, 2048);
+	rtWidth				= clampr(iFloor(scale*Device.dwWidth  + .5f), 128, int(caps.MaxTextureWidth));
+	rtHeight			= clampr(iFloor(scale*Device.dwHeight + .5f), 128, int(caps.MaxTextureHeight));
 	while (rtWidth%2)	rtWidth	--;
 	while (rtHeight%2)	rtHeight--;
 	Msg					("* SSample: %dx%d",rtWidth,rtHeight);
 
-	// Bufferts
 	RT.create			(RTname,			rtWidth,rtHeight,HW.Caps.fTarget);
 	RT_distort.create	(RTname_distort,	rtWidth,rtHeight,HW.Caps.fTarget);
 	if ((rtHeight!=Device.dwHeight) || (rtWidth!=Device.dwWidth))	{
@@ -57,10 +58,8 @@ BOOL CRenderTarget::Create	()
 		ZB->AddRef	();
 	}
 
-	// Temp ZB, used by some of the shadowing code
 	R_CHK	(HW.pDevice->CreateDepthStencilSurface	(512,512,HW.Caps.fDepth,D3DMULTISAMPLE_NONE,0,TRUE,&pTempZB,NULL));
 
-	// Shaders and stream
 	s_postprocess.create				("postprocess");
 	if (RImplementation.o.distortion)	s_postprocess_D.create("postprocess_d");
 	g_postprocess.create				(D3DFVF_XYZRHW|D3DFVF_DIFFUSE|D3DFVF_SPECULAR|D3DFVF_TEX3,RCache.Vertex.Buffer(),RCache.QuadIB);
