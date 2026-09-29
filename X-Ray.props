@@ -17,8 +17,10 @@
 
   <PropertyGroup Label="UserMacros">
 
-    <xrBinaries>$(SolutionDir)\Output\Binaries\</xrBinaries>
-    <xrLibraries>$(SolutionDir)\Output\Libraries\</xrLibraries>
+    <xrPlatformSuffix Condition="'$(Platform)'=='x64'">_x64</xrPlatformSuffix>
+    <xrBinaries>$(SolutionDir)\Output\Binaries$(xrPlatformSuffix)\</xrBinaries>
+    <xrLibraries>$(SolutionDir)\Output\Libraries$(xrPlatformSuffix)\</xrLibraries>
+    <xrIntermediate>$(SolutionDir)\Output\Intermediate$(xrPlatformSuffix)\</xrIntermediate>
     <xrDXSDKLibraries Condition="'$(Platform)'=='Win32'">$(SolutionDir)\Sources\Externals\DXSDK_Jun2010\Lib\x86\</xrDXSDKLibraries>
     <xrDXSDKLibraries Condition="'$(Platform)'=='x64'">$(SolutionDir)\Sources\Externals\DXSDK_Jun2010\Lib\x64\</xrDXSDKLibraries>
 
@@ -29,7 +31,7 @@
     <OutDir Condition="'$(ConfigurationType)'=='Application'">$(xrBinaries)</OutDir>
     <OutDir Condition="'$(ConfigurationType)'=='DynamicLibrary'">$(xrBinaries)</OutDir>
     <OutDir Condition="'$(ConfigurationType)'=='StaticLibrary'">$(xrLibraries)</OutDir>
-    <IntDir>$(SolutionDir)\Output\Intermediate\$(ProjectName)\</IntDir>
+    <IntDir>$(xrIntermediate)$(ProjectName)\</IntDir>
 
   </PropertyGroup>
 
@@ -42,14 +44,11 @@
     </ClCompile>
 
     <ClCompile Condition="'$(Configuration)'=='Debug'">
-      <!-- MultiProcessorCompilation несовместим с LinkIncremental и UseDebugLibraries -->
       <MultiProcessorCompilation>false</MultiProcessorCompilation>
       <Optimization>Disabled</Optimization>
     </ClCompile>
 
     <ClCompile Condition="'$(Configuration)'=='Mixed'">
-      <!-- Optimization = Disabled - принудительное отключение оптимизации -->
-      <!-- Оптимизация включается автоматически, когда UseDebugLibraries = false -->
       <Optimization>MaxSpeed</Optimization>
     </ClCompile>
 
@@ -68,10 +67,15 @@
       <WholeProgramOptimization>true</WholeProgramOptimization>
     </ClCompile>
 
+    <ClCompile Condition="'$(Platform)'=='x64'">
+      <TreatSpecificWarningsAsErrors>4311;4312;4302;%(TreatSpecificWarningsAsErrors)</TreatSpecificWarningsAsErrors>
+    </ClCompile>
+
     <Link>
       <LargeAddressAware>true</LargeAddressAware>
       <SubSystem>Windows</SubSystem>
-      <TargetMachine>MachineX86</TargetMachine>
+      <TargetMachine Condition="'$(Platform)'=='Win32'">MachineX86</TargetMachine>
+      <TargetMachine Condition="'$(Platform)'=='x64'">MachineX64</TargetMachine>
     </Link>
 
     <Link Condition="'$(Configuration)'=='Mixed'">

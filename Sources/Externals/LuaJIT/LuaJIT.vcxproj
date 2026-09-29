@@ -13,6 +13,14 @@
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Mixed|x64">
+      <Configuration>Mixed</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{853D2B10-B375-41B3-891C-91B8298B1847}</ProjectGuid>
@@ -27,9 +35,9 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <PropertyGroup>
-    <OutDir>$(SolutionDir)\Output\Binaries\</OutDir>
-    <IntDir>$(SolutionDir)\Output\Intermediate\$(ProjectName)\</IntDir>
-    <LuaJITLibraryDir>$(SolutionDir)\Output\Libraries\</LuaJITLibraryDir>
+    <OutDir>$(xrBinaries)</OutDir>
+    <IntDir>$(xrIntermediate)$(ProjectName)\</IntDir>
+    <LuaJITLibraryDir>$(xrLibraries)</LuaJITLibraryDir>
     <LuaJITBuildCommand>
 set NoDefaultCurrentDirectoryInExePath=
 robocopy "$(ProjectDir)src" "$(IntDir)src" /E /XX /NJH /NJS /NDL /NFL /NP &gt;nul

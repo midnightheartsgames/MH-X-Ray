@@ -1,7 +1,4 @@
-# Игнорировать пользовательские папки и файлы
-# Ignore user folders and files
-
-# Папки
-# Folders
 Intermediate/
+Intermediate_x64/
 Libraries/
+Libraries_x64/

@@ -9,9 +9,17 @@
       <Configuration>Mixed</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Mixed|x64">
+      <Configuration>Mixed</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -21,17 +29,17 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <Import Project="$(SolutionDir)\X-Ray.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
     <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)'=='Mixed'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
     <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)'=='Release'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
     <PlatformToolset>v143</PlatformToolset>
@@ -39,28 +47,28 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+  <ImportGroup Condition="'$(Configuration)'=='Debug'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'" Label="PropertySheets">
+  <ImportGroup Condition="'$(Configuration)'=='Mixed'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+  <ImportGroup Condition="'$(Configuration)'=='Release'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Output\Binaries\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\Output\Intermediate\$(ProjectName)\</IntDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">$(SolutionDir)\Output\Binaries\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">$(SolutionDir)\Output\Intermediate\$(ProjectName)\</IntDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Output\Binaries\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\Output\Intermediate\$(ProjectName)\</IntDir>
+    <OutDir Condition="'$(Configuration)'=='Debug'">$(xrBinaries)</OutDir>
+    <IntDir Condition="'$(Configuration)'=='Debug'">$(xrIntermediate)$(ProjectName)\</IntDir>
+    <OutDir Condition="'$(Configuration)'=='Mixed'">$(xrBinaries)</OutDir>
+    <IntDir Condition="'$(Configuration)'=='Mixed'">$(xrIntermediate)$(ProjectName)\</IntDir>
+    <OutDir Condition="'$(Configuration)'=='Release'">$(xrBinaries)</OutDir>
+    <IntDir Condition="'$(Configuration)'=='Release'">$(xrIntermediate)$(ProjectName)\</IntDir>
   </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Platform)'=='Win32'">
+  <ItemDefinitionGroup>
     <ClCompile>
       <AdditionalIncludeDirectories>
         $(SolutionDir)\Sources\Externals\Boost\;
@@ -72,12 +80,12 @@
     <Link>
       <AdditionalDependencies>lua51.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>
-        $(SolutionDir)\Output\Libraries\
+        $(xrLibraries)
       </AdditionalLibraryDirectories>
-      <ImportLibrary>$(SolutionDir)\Output\Libraries\$(ProjectName).lib</ImportLibrary>
+      <ImportLibrary>$(xrLibraries)$(ProjectName).lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
     <ClCompile>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -97,7 +105,7 @@
       <GenerateMapFile>false</GenerateMapFile>
     </Link>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Mixed'">
     <ClCompile>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -118,12 +126,12 @@
       <MapFileName>$(OutDir)$(ProjectName).map</MapFileName>
     </Link>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
     <ClCompile>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Platform)'=='Win32'">StreamingSIMDExtensions</EnableEnhancedInstructionSet>
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
       <ExceptionHandling>false</ExceptionHandling>
       <ForceConformanceInForLoopScope>false</ForceConformanceInForLoopScope>
@@ -145,99 +153,99 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Luabind\src\class.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Debug'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Mixed'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Release'">TurnOffAllWarnings</WarningLevel>
     </ClCompile>
     <ClCompile Include="Luabind\src\class_info.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Debug'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Mixed'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Release'">TurnOffAllWarnings</WarningLevel>
     </ClCompile>
     <ClCompile Include="Luabind\src\class_registry.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Debug'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Mixed'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Release'">TurnOffAllWarnings</WarningLevel>
     </ClCompile>
     <ClCompile Include="Luabind\src\class_rep.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Debug'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Mixed'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Release'">TurnOffAllWarnings</WarningLevel>
     </ClCompile>
     <ClCompile Include="Luabind\src\create_class.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Debug'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Mixed'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Release'">TurnOffAllWarnings</WarningLevel>
     </ClCompile>
     <ClCompile Include="Luabind\src\error.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Debug'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Mixed'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Release'">TurnOffAllWarnings</WarningLevel>
     </ClCompile>
     <ClCompile Include="Luabind\src\find_best_match.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Debug'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Mixed'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Release'">TurnOffAllWarnings</WarningLevel>
     </ClCompile>
     <ClCompile Include="Luabind\src\function.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Debug'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Mixed'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Release'">TurnOffAllWarnings</WarningLevel>
     </ClCompile>
     <ClCompile Include="Luabind\src\implicit_cast.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Debug'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Mixed'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Release'">TurnOffAllWarnings</WarningLevel>
     </ClCompile>
     <ClCompile Include="Luabind\src\link_compatibility.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Debug'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Mixed'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Release'">TurnOffAllWarnings</WarningLevel>
     </ClCompile>
     <ClCompile Include="Luabind\src\object.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Debug'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Mixed'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Release'">TurnOffAllWarnings</WarningLevel>
     </ClCompile>
     <ClCompile Include="Luabind\src\object_rep.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Debug'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Mixed'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Release'">TurnOffAllWarnings</WarningLevel>
     </ClCompile>
     <ClCompile Include="Luabind\src\open.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Debug'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Mixed'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Release'">TurnOffAllWarnings</WarningLevel>
     </ClCompile>
     <ClCompile Include="Luabind\src\pcall.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Debug'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Mixed'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Release'">TurnOffAllWarnings</WarningLevel>
     </ClCompile>
     <ClCompile Include="Luabind\src\ref.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Debug'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Mixed'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Release'">TurnOffAllWarnings</WarningLevel>
     </ClCompile>
     <ClCompile Include="Luabind\src\scope.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Debug'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Mixed'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Release'">TurnOffAllWarnings</WarningLevel>
     </ClCompile>
     <ClCompile Include="Luabind\src\stack_content_by_name.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Debug'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Mixed'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Release'">TurnOffAllWarnings</WarningLevel>
     </ClCompile>
     <ClCompile Include="Luabind\src\weak_ref.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Debug'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Mixed'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Release'">TurnOffAllWarnings</WarningLevel>
     </ClCompile>
     <ClCompile Include="Luabind\src\wrapper_base.cpp">
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">TurnOffAllWarnings</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Debug'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Mixed'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)'=='Release'">TurnOffAllWarnings</WarningLevel>
     </ClCompile>
     <ClCompile Include="StdAfx.cpp" />
   </ItemGroup>

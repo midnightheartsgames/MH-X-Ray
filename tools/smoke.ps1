@@ -2,6 +2,8 @@
 param(
     [ValidateSet('r1', 'r2a', 'r2')]
     [string]$Renderer = 'r1',
+    [ValidateSet('Win32', 'x64')]
+    [string]$Platform = 'Win32',
     [string]$Save = 'smoke_reference',
     [int]$Seconds = 30,
     [int]$TimeoutSeconds = 300,
@@ -21,7 +23,9 @@ function Get-WarningLines([string[]]$LogLines) {
 }
 
 $GameDir = (Resolve-Path $GameDir).Path
-$engine = Join-Path $GameDir 'binaries\xrEngine.exe'
+$binaries = if ($Platform -eq 'x64') { 'binaries_x64' } else { 'binaries' }
+$runLabel = if ($Platform -eq 'x64') { "x64-$Renderer" } else { $Renderer }
+$engine = Join-Path $GameDir "$binaries\xrEngine.exe"
 $appData = Join-Path $GameDir 'appdata'
 $logDir = Join-Path $appData 'logs'
 $resultDir = Join-Path $PSScriptRoot '..\Output\Smoke'
@@ -69,7 +73,7 @@ $log = Get-ChildItem -Path $logDir -Filter 'xray_*.log' |
 $logLines = @()
 if ($log) {
     $logLines = [System.IO.File]::ReadAllLines($log.FullName, $latin1)
-    $copy = Join-Path $resultDir ("{0:yyyyMMdd-HHmmss}-{1}.log" -f $startTime, $Renderer)
+    $copy = Join-Path $resultDir ("{0:yyyyMMdd-HHmmss}-{1}.log" -f $startTime, $runLabel)
     Copy-Item $log.FullName $copy
 }
 else {
@@ -98,6 +102,7 @@ if ($Baseline) {
 $crashReports = Get-ChildItem -Path $logDir |
     Where-Object { $_.Name -notlike 'xray_*.log' -and $_.LastWriteTime -ge $startTime }
 
+Write-Output "platform : $Platform"
 Write-Output "renderer : $Renderer"
 Write-Output "target   : $(if ($NewGame) { 'new game' } elseif ($Menu) { 'main menu' } else { $Save })"
 Write-Output "exit     : $(if ($exited) { $process.ExitCode } else { 'killed' })"

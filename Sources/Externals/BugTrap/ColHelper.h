@@ -294,14 +294,10 @@ public:
 	static unsigned HashKey(const KEY_TYPE& key);
 };
 
-/**
- * @param key - hash value must be generated for this object.
- * @return hash value of the given object.
- */
 template <typename KEY_TYPE>
 inline unsigned CHashTraits<KEY_TYPE>::HashKey(const KEY_TYPE& key)
 {
-	return ((unsigned)key >> 4);
+	return (unsigned)((UINT_PTR)key >> 4);
 }
 
 /// Explicit template specialization for string hash tables.
