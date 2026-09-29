@@ -198,7 +198,7 @@ FPS: разброс между прогонами подряд большой (R
 
 ### Этап 3. Замена x86-only зависимостей (Win32) — L
 
-#### 3.1. LuaJIT 1.0.3 → LuaJIT 2.1 (выполнен 2026-09-28, коммит `d9739dd`; ручная проверка геймплея — за пользователем)
+#### 3.1. LuaJIT 1.0.3 → LuaJIT 2.1 (выполнен 2026-09-28, коммит `d9739dd`)
 
 Что сделано:
 
@@ -224,15 +224,24 @@ FPS: разброс между прогонами подряд большой (R
 - Новая игра (`-NewGame -Seconds 60`) — PASS, ошибок Lua нет.
 - 15 минут A-Life на эталонном сейве (`-Seconds 900`) — PASS, ошибок Lua нет.
 - FPS, медиана трёх прогонов: R1 769 (этап 2 — 772), R2 386,5 (этап 2 — 390).
-- Вручную не проверено, нужен игрок: первые диалоги, получение и сдача квеста, торговля, PDA.
+- Ручная проверка пользователем 2026-09-29 (R1, новая игра на Кордоне, выход в меню и загрузка): вылетов нет, строк `[LUA]` в логе нет. Строка `***FATAL***: Too many lmap-textures` в том же логе — старая проверка лимитов уровня (`IGame_Level_check_textures.cpp`), она только пишет в лог: у Кордона на R1 10 лайтмапов при лимите 8.
 
-#### 3.2. Звук: OpenAL Soft
+#### 3.2. Звук: OpenAL Soft (выполнен 2026-09-29, коммит `ee42e11`; проверка на слух — за пользователем)
 
-- Удалить `Externals/OpenAL32`, `Externals/EAX`, `Game/binaries/EAX.dll`.
-- Удалить DirectSound-бэкенд `SoundRender_CoreD.*` и `SoundRender_TargetD.*`. Только он использует `eax.lib` (`xrSound/stdafx.cpp:18`) и `EAXDirectSoundCreate` (`SoundRender_CoreD.cpp:63`).
-- Подключить OpenAL Soft фиксированной версии (x86 и x64): заголовки, `OpenAL32.lib`, рантайм `soft_oal.dll`, переименованный в `OpenAL32.dll`. OpenAL Soft с версии 1.23 эмулирует EAX, путь `EAXSet`/`EAXGet` через `alGetProcAddress` в `SoundRender_CoreA.cpp` сохраняется.
+Что сделано:
 
-Приёмка: в логе устройство OpenAL Soft; 3D-позиционирование, музыка, эмбиент, диалоги работают; `snd_efx` вкл/выкл без падений.
+- `Externals/OpenALSoft` — официальный бинарный релиз OpenAL Soft 1.25.2 (`openal-soft-1.25.2-bin.zip`, SHA-256 `67A0C4B800BD860C93C04F38CAF8CBE4875F9C84700AC430EFC451F70E265434`, LGPL-2.1, исходники — тег `1.25.2` в github.com/kcat/openal-soft). В репозитории: заголовки `include/AL`, `soft_oal.dll` для Win32 и Win64, `OpenAL32.def` из `libs/Win32` и `libs/Win64`, лицензии.
+- Import-библиотеки из пакета собраны MinGW; на x86 MSVC их отвергает (LNK2026: нет данных SAFESEH). Поэтому xrSound перед линковкой создаёт свою import-библиотеку из `.def` через `lib.exe` в `Output\Intermediate\xrSound`, а после сборки копирует `soft_oal.dll` в `Output\Binaries\OpenAL32.dll`.
+- Удалены DirectSound-бэкенд (`-dsound`, `SoundRender_CoreD.*`, `SoundRender_TargetD.*`), `eax.lib`, `dsound.lib`, роутер `Externals/OpenAL32` и `Game/binaries/EAX.dll`. `Externals/EAX/Include/eax.h` оставлен: в нём наборы свойств EAX, которые движок передаёт через `EAXSet`/`EAXGet`. `EAX.dll` в папке игры не тронут: движок его больше не загружает.
+- OpenAL Soft эмулирует EAX, поэтому EAX 2.0 теперь есть на любом устройстве. Раньше на «Generic Software» его не было. Реверберация окружений (`snd_efx`) теперь звучит у всех.
+- `smoke.ps1`: добавлен `-ConfigOverrides` (значения консольных команд для `smoke.ltx`).
+
+Приёмка:
+
+- В логе `OpenAL Soft` и `EAX 2.0 extension: present`, `EAX 2.0 deferred: present`.
+- `smoke.ps1 -Baseline` на R1 и R2, уровень и меню — PASS; `-ConfigOverrides @{ snd_efx = 'off' }` — PASS.
+- FPS: в этом сеансе машина медленнее, чем при замерах этапа 3.1 (R1 около 610–630 во всех режимах). Звук целиком стоит 2–3 % (R1 со звуком 609 и 612, с `-nosound` 629 и 621), значит смена бэкенда укладывается в допуск.
+- Вручную, на слух (нужен игрок): 3D-позиционирование, музыка, эмбиент, диалоги, реверберация с `snd_efx on` и `off`.
 
 #### 3.3. Библиотеки DirectX
 
