@@ -86,10 +86,16 @@ void CUICursor::UpdateCursorPosition()
 	BOOL r		= GetCursorPos(&p);
 	R_ASSERT	(r);
 
+	RECT		client;
+	GetClientRect	(Device.m_hWnd,&client);
+	if ((client.right<=0) || (client.bottom<=0))
+		return;
+	ScreenToClient	(Device.m_hWnd,&p);
+
 	vPrevPos = vPos;
 
-	vPos.x			= (float)p.x * (UI_BASE_WIDTH/(float)Device.dwWidth);
-	vPos.y			= (float)p.y * (UI_BASE_HEIGHT/(float)Device.dwHeight);
+	vPos.x			= (float)p.x * (UI_BASE_WIDTH/(float)client.right);
+	vPos.y			= (float)p.y * (UI_BASE_HEIGHT/(float)client.bottom);
 	clamp			(vPos.x, 0.f, UI_BASE_WIDTH);
 	clamp			(vPos.y, 0.f, UI_BASE_HEIGHT);
 }
@@ -97,9 +103,13 @@ void CUICursor::UpdateCursorPosition()
 void CUICursor::SetUICursorPosition(Fvector2 pos)
 {
 	vPos		= pos;
+
+	RECT		client;
+	GetClientRect	(Device.m_hWnd,&client);
 	POINT		p;
-	p.x			= iFloor(vPos.x / (UI_BASE_WIDTH/(float)Device.dwWidth));
-	p.y			= iFloor(vPos.y / (UI_BASE_HEIGHT/(float)Device.dwHeight));
+	p.x			= iFloor(vPos.x / (UI_BASE_WIDTH/(float)client.right));
+	p.y			= iFloor(vPos.y / (UI_BASE_HEIGHT/(float)client.bottom));
+	ClientToScreen	(Device.m_hWnd,&p);
 
 	SetCursorPos(p.x, p.y);
 }

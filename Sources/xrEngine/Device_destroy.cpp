@@ -25,6 +25,7 @@ void CRenderDevice::Destroy	(void) {
 
 	Log("Destroying Direct3D...");
 
+	ReleaseCursorClip			();
 	ShowCursor	(TRUE);
 	HW.Validate					();
 

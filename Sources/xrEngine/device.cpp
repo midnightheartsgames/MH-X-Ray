@@ -198,6 +198,7 @@ void CRenderDevice::Run			()
         else
         {
 			if (b_is_Ready) {
+				UpdateCursorClip				();
 
 				if (psDeviceFlags.test(rsStatistic))	g_bEnableStatGather	= TRUE;
 				else									g_bEnableStatGather	= FALSE;
@@ -393,14 +394,42 @@ void CRenderDevice::OnWM_Activate(WPARAM wParam, LPARAM lParam)
 	{
 		Device.b_is_Active				= bActive;
 
-		if (Device.b_is_Active)	
+		if (Device.b_is_Active)
 		{
 			Device.seqAppActivate.Process(rp_AppActivate);
 				ShowCursor			(FALSE);
-		}else	
+		}else
 		{
 			Device.seqAppDeactivate.Process(rp_AppDeactivate);
 			ShowCursor				(TRUE);
 		}
+		UpdateCursorClip				();
 	}
+}
+
+void CRenderDevice::UpdateCursorClip()
+{
+	BOOL	borderless			= !psDeviceFlags.is(rsFullscreen) && psDeviceFlags.is(rsBorderless);
+	if (!borderless || !b_is_Active || (GetForegroundWindow()!=m_hWnd))
+	{
+		ReleaseCursorClip		();
+		return;
+	}
+
+	RECT	window_rect;
+	RECT	clip_rect;
+	GetWindowRect				(m_hWnd,&window_rect);
+	if (b_is_CursorClipped && GetClipCursor(&clip_rect) && EqualRect(&window_rect,&clip_rect))
+		return;
+
+	b_is_CursorClipped			= ClipCursor(&window_rect);
+}
+
+void CRenderDevice::ReleaseCursorClip()
+{
+	if (!b_is_CursorClipped)
+		return;
+
+	ClipCursor					(NULL);
+	b_is_CursorClipped			= FALSE;
 }

@@ -203,6 +203,7 @@ void gather_info		(const char *expression, const char *description, const char *
 
 void xrDebug::do_exit	(const std::string &message)
 {
+	ClipCursor			(NULL);
 	FlushLog			();
 	if (!strstr(GetCommandLine(),"-silent_error_mode"))
 		MessageBox		(NULL,message.c_str(),"Error",MB_OK|MB_ICONERROR|MB_SYSTEMMODAL);
@@ -219,6 +220,7 @@ void xrDebug::backend	(const char *expression, const char *description, const ch
 
 	CS.Enter			();
 
+	ClipCursor			(NULL);
 	error_after_dialog	= true;
 
 	string4096			assertion_info;
@@ -617,6 +619,7 @@ LONG WINAPI UnhandledFilter	(_EXCEPTION_POINTERS *pExceptionInfo)
 {
 	string256				error_message;
 	format_message			(error_message,sizeof(error_message));
+	ClipCursor				(NULL);
 
 	if (!error_after_dialog && !strstr(GetCommandLine(),"-no_call_stack_assert")) {
 		CONTEXT				save = *pExceptionInfo->ContextRecord;

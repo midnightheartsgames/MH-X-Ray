@@ -38,6 +38,9 @@ private:
 	void									_Create		(LPCSTR shName);
 	void									_Destroy	(BOOL	bKeepTextures);
 	void									_SetupStates();
+
+	BOOL									b_is_CursorClipped;
+	void									ReleaseCursorClip();
 public:
     HWND									m_hWnd;
 	LRESULT									MsgProc		(HWND,UINT,WPARAM,LPARAM);
@@ -51,6 +54,7 @@ public:
 	BOOL									b_is_Ready;
 	BOOL									b_is_Active;
 	void									OnWM_Activate(WPARAM wParam, LPARAM lParam);
+	void									UpdateCursorClip();
 public:
 	ref_shader								m_WireShader;
 	ref_shader								m_SelectionShader;
@@ -112,6 +116,7 @@ public:
 	    m_hWnd              = NULL;
 		b_is_Active			= FALSE;
 		b_is_Ready			= FALSE;
+		b_is_CursorClipped	= FALSE;
 		Timer.Start			();
 		m_bNearer			= FALSE;
 	};

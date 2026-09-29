@@ -469,6 +469,7 @@ void	CHW::updateWindowProps	(HWND m_hWnd)
 
 		ShowCursor	(FALSE);
 		SetForegroundWindow( m_hWnd );
+		Device.UpdateCursorClip	();
 }
 
 
