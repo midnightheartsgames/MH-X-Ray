@@ -78,7 +78,7 @@
     <Link>
       <AdditionalLibraryDirectories>
         $(SolutionDir)\Output\Libraries\;
-        $(SolutionDir)\Sources\Externals\DXSDK_Jun2010\Lib\;
+        $(xrDXSDKLibraries);
         $(SolutionDir)\Sources\Externals\Xiph\Libraries\
       </AdditionalLibraryDirectories>
       <ImportLibrary>$(SolutionDir)\Output\Libraries\$(ProjectName).lib</ImportLibrary>

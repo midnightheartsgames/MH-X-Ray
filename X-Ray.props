@@ -19,6 +19,8 @@
 
     <xrBinaries>$(SolutionDir)\Output\Binaries\</xrBinaries>
     <xrLibraries>$(SolutionDir)\Output\Libraries\</xrLibraries>
+    <xrDXSDKLibraries Condition="'$(Platform)'=='Win32'">$(SolutionDir)\Sources\Externals\DXSDK_Jun2010\Lib\x86\</xrDXSDKLibraries>
+    <xrDXSDKLibraries Condition="'$(Platform)'=='x64'">$(SolutionDir)\Sources\Externals\DXSDK_Jun2010\Lib\x64\</xrDXSDKLibraries>
 
   </PropertyGroup>
 
