@@ -884,6 +884,7 @@ class CSmokeTest
 	bool			m_measuring;
 	bool			m_finished;
 	CTimerBase		m_timer;
+	string64		m_save_name;
 
 	void			configure		()
 	{
@@ -896,6 +897,11 @@ class CSmokeTest
 
 		m_duration_ms				= u32(atoi(value+xr_strlen(key)))*1000;
 		m_menu_mode					= (0==strstr(Core.Params,"-start "));
+
+		LPCSTR		save_key		= "-smoke_save ";
+		LPCSTR		save_value		= strstr(Core.Params,save_key);
+		if (save_value)
+			sscanf					(save_value+xr_strlen(save_key),"%63[^ ]",m_save_name);
 	}
 
 	bool			menu_active		() const
@@ -903,7 +909,7 @@ class CSmokeTest
 		return		g_pGamePersistent && g_pGamePersistent->m_pMainMenu && g_pGamePersistent->m_pMainMenu->IsActive();
 	}
 public:
-					CSmokeTest		() : m_duration_ms(0), m_start_frame(0), m_inactive_frames(0), m_configured(false), m_enabled(false), m_menu_mode(false), m_armed(false), m_measuring(false), m_finished(false) {}
+					CSmokeTest		() : m_duration_ms(0), m_start_frame(0), m_inactive_frames(0), m_configured(false), m_enabled(false), m_menu_mode(false), m_armed(false), m_measuring(false), m_finished(false) { m_save_name[0] = 0; }
 
 	void			arm				()
 	{
@@ -950,6 +956,8 @@ public:
 		Msg							("* smoke_test: %u frames in %u ms, %.1f fps, %u inactive frames",frames,elapsed_ms,float(frames)*1000.f/float(elapsed_ms),m_inactive_frames);
 		m_armed						= false;
 		m_finished					= true;
+		if (m_save_name[0])
+			Console->Execute		(make_string("save %s",m_save_name).c_str());
 		Console->Execute			("quit");
 	}
 }	SmokeTest;

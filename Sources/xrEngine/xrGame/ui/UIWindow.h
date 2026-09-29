@@ -2,8 +2,8 @@
 #include "../xr_level_controller.h"
 class CUIWindow;
 
-struct _12b	{ DWORD _[3]; };
-extern poolSS< _12b, 128>	ui_allocator;
+struct ui_list_node_block	{ void* _[3]; };
+extern poolSS< ui_list_node_block, 128>	ui_allocator;
 
 
 template <class T>
@@ -27,25 +27,26 @@ public:
 													uialloc			(const uialloc<T>&)						{	}
 	template<class _Other>							uialloc			(const uialloc<_Other>&)					{	}
 	template<class _Other>	uialloc<T>&				operator=		(const uialloc<_Other>&)					{	return (*this);	}
-							pointer					allocate		(size_type n, const void* p=0) const	
+							pointer					allocate		(size_type n, const void* p=0) const
 							{	VERIFY(1==n);
-								return (pointer) ui_allocator.create();	
+								static_assert(sizeof(T) <= sizeof(ui_list_node_block), "ui_list node does not fit into an ui_allocator block");
+								return (pointer) ui_allocator.create();
 							};
 							char*			__charalloc		(size_type n)							
 							{	VERIFY	(1==n);
 								return	(char*) ui_allocator.create();	
 							};
-							void					deallocate		(pointer p, size_type n) const			
-							{	
+							void					deallocate		(pointer p, size_type n) const
+							{
 								VERIFY(1==n);
-								_12b* p_ = (_12b*)p;
-								ui_allocator.destroy	(p_);				
+								ui_list_node_block* p_ = (ui_list_node_block*)p;
+								ui_allocator.destroy	(p_);
 							}
-							void					deallocate		(void* p, size_type n) const		
-							{	
+							void					deallocate		(void* p, size_type n) const
+							{
 								VERIFY(1==n);
-								_12b* p_ = (_12b*)p;
-								ui_allocator.destroy	(p_);				
+								ui_list_node_block* p_ = (ui_list_node_block*)p;
+								ui_allocator.destroy	(p_);
 							}
 							void					construct		(pointer p, const T& _Val)				{	std::_Construct(p, _Val);	}
 							void					destroy			(pointer p)								{	std::_Destroy(p);			}

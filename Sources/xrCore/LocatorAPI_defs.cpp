@@ -58,15 +58,13 @@ FS_Path::~FS_Path	()
 
 void	FS_Path::_set	(LPSTR add)
 {
-	// m_Add
 	R_ASSERT		(add);
 	xr_free			(m_Add);
 	m_Add			= xr_strlwr(xr_strdup(add));
 
-	// m_Path
 	string_path		temp;
 	strconcat		(sizeof(temp),temp,m_Root,m_Add);
-	if (temp[xr_strlen(temp)-1]!='\\') strcat(temp,"\\");
+	if (temp[0] && temp[xr_strlen(temp)-1]!='\\') strcat(temp,"\\");
 	xr_free			(m_Path);
 	m_Path			= xr_strlwr(xr_strdup(temp));
 }

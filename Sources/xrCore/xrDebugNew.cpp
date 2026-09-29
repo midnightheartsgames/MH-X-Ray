@@ -592,6 +592,27 @@ void format_message	(LPSTR buffer, const u32 &buffer_size)
     LocalFree	(message);
 }
 
+static LPCSTR	access_violation_operation	(ULONG_PTR operation)
+{
+	switch (operation)
+	{
+	case 0:		return	"reading";
+	case 1:		return	"writing";
+	case 8:		return	"executing";
+	default:	return	"accessing";
+	}
+}
+
+static void	format_exception	(LPSTR buffer, u32 buffer_size, const EXCEPTION_RECORD &record)
+{
+	if ((EXCEPTION_ACCESS_VIOLATION == record.ExceptionCode) && (record.NumberParameters >= 2)) {
+		sprintf_s	(buffer,buffer_size,"exception 0x%08X at %p: access violation %s %p",record.ExceptionCode,record.ExceptionAddress,access_violation_operation(record.ExceptionInformation[0]),(void*)record.ExceptionInformation[1]);
+		return;
+	}
+
+	sprintf_s		(buffer,buffer_size,"exception 0x%08X at %p",record.ExceptionCode,record.ExceptionAddress);
+}
+
 LONG WINAPI UnhandledFilter	(_EXCEPTION_POINTERS *pExceptionInfo)
 {
 	string256				error_message;
@@ -602,9 +623,16 @@ LONG WINAPI UnhandledFilter	(_EXCEPTION_POINTERS *pExceptionInfo)
 		BuildStackTrace		(pExceptionInfo);
 		*pExceptionInfo->ContextRecord = save;
 
+		string256			exception_message;
+		format_exception	(exception_message,sizeof(exception_message),*pExceptionInfo->ExceptionRecord);
+		if (shared_str_initialized)
+			Msg				("%s",exception_message);
+		copy_to_clipboard	(exception_message);
+		update_clipboard	("\r\n\r\n");
+
 		if (shared_str_initialized)
 			Msg				("stack trace:\n");
-		copy_to_clipboard	("stack trace:\r\n\r\n");
+		update_clipboard	("stack trace:\r\n\r\n");
 
 		string4096			buffer;
 		for (int i=0; i<g_stackTraceCount; ++i) {

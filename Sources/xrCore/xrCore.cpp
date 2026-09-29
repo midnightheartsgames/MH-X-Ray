@@ -32,6 +32,35 @@ static void	reset_floating_point_control	()
 	_control87		( _MCW_EM,  MCW_EM );
 }
 
+#if defined(_M_X64) && defined(DEBUG)
+static size_t	low_address_space_reserved	= 0;
+
+static void	reserve_low_address_space		()
+{
+	SYSTEM_INFO				system_info;
+	GetSystemInfo			(&system_info);
+	const uintptr_t			granularity	= system_info.dwAllocationGranularity;
+	const uintptr_t			limit		= uintptr_t(1) << 32;
+	uintptr_t				address		= uintptr_t(system_info.lpMinimumApplicationAddress);
+	while (address < limit)
+	{
+		MEMORY_BASIC_INFORMATION	info;
+		if (!VirtualQuery((LPCVOID)address,&info,sizeof(info)))
+			break;
+
+		const uintptr_t		region_end	= uintptr_t(info.BaseAddress) + info.RegionSize;
+		if (MEM_FREE == info.State)
+		{
+			const uintptr_t	start		= (address + granularity - 1) & ~(granularity - 1);
+			const uintptr_t	end			= region_end < limit ? region_end : limit;
+			if ((start < end) && VirtualAlloc((LPVOID)start,end - start,MEM_RESERVE,PAGE_NOACCESS))
+				low_address_space_reserved	+= end - start;
+		}
+		address				= region_end;
+	}
+}
+#endif
+
 void xrCore::_initialize	(LPCSTR _ApplicationName, LogCallback cb, BOOL init_fs, LPCSTR fs_fname)
 {
 	strcpy_s					(ApplicationName,_ApplicationName);
@@ -103,9 +132,12 @@ void xrCore::_initialize	(LPCSTR _ApplicationName, LogCallback cb, BOOL init_fs,
 		EFS._initialize		();
 #ifdef DEBUG
     #ifndef	_EDITOR
-		Msg					("CRT heap 0x%08x",_get_heap_handle());
-		Msg					("Process heap 0x%08x",GetProcessHeap());
+		Msg					("CRT heap %p",(void*)_get_heap_handle());
+		Msg					("Process heap %p",GetProcessHeap());
     #endif
+#endif
+#if defined(_M_X64) && defined(DEBUG)
+		Msg					("* address space below 4 GB reserved: %u MB",u32(low_address_space_reserved >> 20));
 #endif
 	}
 	SetLogCB				(cb);
@@ -149,6 +181,9 @@ void xrCore::_destroy		()
 	{
 	case DLL_PROCESS_ATTACH:
 		reset_floating_point_control	();
+#if defined(_M_X64) && defined(DEBUG)
+		reserve_low_address_space		();
+#endif
 		break;
 	case DLL_THREAD_ATTACH:
 		CoInitializeEx	(NULL, COINIT_MULTITHREADED);

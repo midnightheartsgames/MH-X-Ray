@@ -11,6 +11,9 @@ param(
     [string]$Baseline,
     [string]$ExtraArguments,
     [hashtable]$ConfigOverrides = @{},
+    [string]$Binaries,
+    [string]$SaveAs,
+    [switch]$Intro,
     [switch]$Menu,
     [switch]$NewGame
 )
@@ -23,9 +26,9 @@ function Get-WarningLines([string[]]$LogLines) {
 }
 
 $GameDir = (Resolve-Path $GameDir).Path
-$binaries = if ($Platform -eq 'x64') { 'binaries_x64' } else { 'binaries' }
+if (-not $Binaries) { $Binaries = if ($Platform -eq 'x64') { 'binaries_x64' } else { 'binaries' } }
 $runLabel = if ($Platform -eq 'x64') { "x64-$Renderer" } else { $Renderer }
-$engine = Join-Path $GameDir "$binaries\xrEngine.exe"
+$engine = Join-Path $GameDir "$Binaries\xrEngine.exe"
 $appData = Join-Path $GameDir 'appdata'
 $logDir = Join-Path $appData 'logs'
 $resultDir = Join-Path $PSScriptRoot '..\Output\Smoke'
@@ -47,8 +50,10 @@ $smokeConfig = @($userConfig | Where-Object { $overrides.Keys -notcontains ($_ -
 $smokeConfig += $overrides.GetEnumerator() | ForEach-Object { "$($_.Key) $($_.Value)" }
 [System.IO.File]::WriteAllLines((Join-Path $appData 'smoke.ltx'), [string[]]$smokeConfig, $latin1)
 
-$arguments = "-nointro -silent_error_mode -ltx smoke.ltx"
+$arguments = "-silent_error_mode -ltx smoke.ltx"
+if (-not $Intro) { $arguments = "-nointro $arguments" }
 if ($ExtraArguments) { $arguments += " $ExtraArguments" }
+if ($SaveAs) { $arguments += " -smoke_save $SaveAs" }
 $arguments += " -smoke_test $Seconds"
 if ($NewGame) { $arguments += " -start server(all/single/alife/new) client(localhost)" }
 elseif (-not $Menu) { $arguments += " -start server($Save/single/alife/load) client(localhost)" }
@@ -102,7 +107,7 @@ if ($Baseline) {
 $crashReports = Get-ChildItem -Path $logDir |
     Where-Object { $_.Name -notlike 'xray_*.log' -and $_.LastWriteTime -ge $startTime }
 
-Write-Output "platform : $Platform"
+Write-Output "platform : $Platform ($Binaries)"
 Write-Output "renderer : $Renderer"
 Write-Output "target   : $(if ($NewGame) { 'new game' } elseif ($Menu) { 'main menu' } else { $Save })"
 Write-Output "exit     : $(if ($exited) { $process.ExitCode } else { 'killed' })"

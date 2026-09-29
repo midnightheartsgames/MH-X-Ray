@@ -435,8 +435,6 @@ void CConsole::ExecuteCommand()
 			if (editor[i+1]==' ') continue;
 			if (i==len-1) goto outloop;
 			break;
-//.		case ';':
-//.			goto outloop;
 		}
 		converted[j++]=editor[i];
 	}
@@ -446,22 +444,20 @@ outloop:
 	else					strcpy_s(editor,converted);
 	if (editor[0]==0)		return;
 	if (RecordCommands)		Log("~",editor);
-	
-	// split into cmd/params
+
 	editor[j++  ]	=	' ';
 	editor[len=j]	=	0;
 	for (i=0; i<len; i++) {
 		if (editor[i]!=' ') first_word[i]=editor[i];
 		else {
-			// last 'word' - exit
 			strcpy_s(last_word,editor+i+1);
 			break;
 		}
 	}
 	first_word[i]=0;
-	if (last_word[xr_strlen(last_word)-1]==' ') last_word[xr_strlen(last_word)-1]=0;
-	
-	// search
+	u32 last_length	= xr_strlen(last_word);
+	if (last_length && (last_word[last_length-1]==' ')) last_word[last_length-1]=0;
+
 	vecCMD_IT I = Commands.find(first_word);
 	if (I!=Commands.end()) {
 		IConsole_Command &C = *(I->second);
