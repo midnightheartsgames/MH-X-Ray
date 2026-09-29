@@ -20,30 +20,28 @@ XRCORE_API DUMMY_STUFF	*g_dummy_stuff = 0;
 #ifdef DEBUG
 	XRCORE_API	u32								g_file_mapped_memory = 0;
 	u32								g_file_mapped_count	= 0;
-	typedef std::map<u32,std::pair<u32,shared_str> >	FILE_MAPPINGS;
+	typedef std::map<const void*,std::pair<u32,shared_str> >	FILE_MAPPINGS;
 	FILE_MAPPINGS					g_file_mappings;
 
 void register_file_mapping			(void *address, const u32 &size, LPCSTR file_name)
 {
-	FILE_MAPPINGS::const_iterator	I = g_file_mappings.find(*(u32*)&address);
+	FILE_MAPPINGS::const_iterator	I = g_file_mappings.find(address);
 	VERIFY							(I == g_file_mappings.end());
-	g_file_mappings.insert			(std::make_pair(*(u32*)&address,std::make_pair(size,shared_str(file_name))));
+	g_file_mappings.insert			(std::make_pair(address,std::make_pair(size,shared_str(file_name))));
 
 	g_file_mapped_memory			+= size;
 	++g_file_mapped_count;
 #ifdef USE_MEMORY_MONITOR
-//	memory_monitor::monitor_alloc	(addres,size,"file mapping");
 	string512						temp;
 	sprintf_s						(temp, sizeof(temp),"file mapping: %s",file_name);
 	memory_monitor::monitor_alloc	(address,size,temp);
-#endif // USE_MEMORY_MONITOR
+#endif
 }
 
 void unregister_file_mapping		(void *address, const u32 &size)
 {
-	FILE_MAPPINGS::iterator			I = g_file_mappings.find(*(u32*)&address);
+	FILE_MAPPINGS::iterator			I = g_file_mappings.find(address);
 	VERIFY							(I != g_file_mappings.end());
-//	VERIFY2							((*I).second.first == size,make_string("file mapping sizes are different: %d -> %d",(*I).second.first,size));
 	g_file_mapped_memory			-= (*I).second.first;
 	--g_file_mapped_count;
 
@@ -51,7 +49,7 @@ void unregister_file_mapping		(void *address, const u32 &size)
 
 #ifdef USE_MEMORY_MONITOR
 	memory_monitor::monitor_free	(address);
-#endif // USE_MEMORY_MONITOR
+#endif
 }
 
 XRCORE_API void dump_file_mappings	()
@@ -62,13 +60,13 @@ XRCORE_API void dump_file_mappings	()
 	FILE_MAPPINGS::const_iterator	E = g_file_mappings.end();
 	for ( ; I != E; ++I)
 		Msg							(
-			"* [0x%08x][%d][%s]",
+			"* [%p][%d][%s]",
 			(*I).first,
 			(*I).second.first,
 			(*I).second.second.c_str()
 		);
 }
-#endif // DEBUG
+#endif
 //////////////////////////////////////////////////////////////////////
 // Tools
 //////////////////////////////////////////////////////////////////////

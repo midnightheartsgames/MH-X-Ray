@@ -97,15 +97,14 @@ public:
 	virtual		~ISpatial		();
 };
 
-//////////////////////////////////////////////////////////////////////////
 class ENGINE_API				ISpatial_NODE
 {
 public:
-	typedef	_W64 unsigned		ptrt;
+	typedef	uintptr_t			ptrt;
 public:
-	ISpatial_NODE*				parent;					// parent node for "empty-members" optimization
-	ISpatial_NODE*				children		[8];	// children nodes
-	xr_vector<ISpatial*>		items;					// own items
+	ISpatial_NODE*				parent;
+	ISpatial_NODE*				children		[8];
+	xr_vector<ISpatial*>		items;
 public:
 	void						_init			(ISpatial_NODE* _parent);
 	void						_remove			(ISpatial*		_S);

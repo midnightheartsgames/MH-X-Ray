@@ -280,18 +280,17 @@ void  CUITalkWnd::ToTopicMode		()
 
 void CUITalkWnd::AskQuestion()
 {
-	if(m_bNeedToUpdateQuestions) return;//quick dblclick:(
+	if(m_bNeedToUpdateQuestions) return;
 	shared_str					phrase_id;
 
-	//игрок выбрал тему разговора
 	if(TopicMode())
 	{
 		if ( (UITalkDialogWnd->m_ClickedQuestionID =="") ||
-			(!m_pOurDialogManager->HaveAvailableDialog(UITalkDialogWnd->m_ClickedQuestionID)) ) 
+			(!m_pOurDialogManager->HaveAvailableDialog(UITalkDialogWnd->m_ClickedQuestionID)) )
 		{
 
 			string128	s;
-			sprintf_s		(s,"ID = [%s] of selected question is out of range of available dialogs ",UITalkDialogWnd->m_ClickedQuestionID);
+			sprintf_s		(s,"ID = [%s] of selected question is out of range of available dialogs ",UITalkDialogWnd->m_ClickedQuestionID.c_str());
 			VERIFY2(FALSE, s);
 		}
 

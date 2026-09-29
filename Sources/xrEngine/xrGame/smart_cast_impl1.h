@@ -449,11 +449,11 @@ namespace SmartDynamicCast {
 			VERIFY2				(
 				temp == test,
 				make_string(
-					"SmartCast<%s*>(%s*) FAILED (result differs from the dynamic_cast) or object is CORRUPTED (0x%08x -> 0x%08x)!",
+					"SmartCast<%s*>(%s*) FAILED (result differs from the dynamic_cast) or object is CORRUPTED (%p -> %p)!",
 					typeid(T1).name(),
 					typeid(T2).name(),
-					*(u32*)&test,
-					*(u32*)&temp
+					test,
+					temp
 				)
 			);
 			return				(temp);

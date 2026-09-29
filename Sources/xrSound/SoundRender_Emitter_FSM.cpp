@@ -13,7 +13,7 @@ void CSoundRender_Emitter::update	(float dt)
 	u32 dwDeltaTime		= SoundRender->Timer_Delta;
 
 	VERIFY2(!!(owner_data) || (!(owner_data)&&(state==stStopped)),"owner");
-	VERIFY2(owner_data?*(int*)(&owner_data->feedback):1,"owner");
+	VERIFY2(!owner_data || owner_data->feedback,"owner");
 
 	if (bRewind){
 		if (target)		SoundRender->i_rewind	(this);
