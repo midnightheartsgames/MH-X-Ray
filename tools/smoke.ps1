@@ -8,6 +8,7 @@ param(
     [string]$GameDir = (Join-Path $PSScriptRoot '..\..\S.T.A.L.K.E.R. Shadow of Chernobyl'),
     [string]$Baseline,
     [string]$ExtraArguments,
+    [hashtable]$ConfigOverrides = @{},
     [switch]$Menu,
     [switch]$NewGame
 )
@@ -36,6 +37,7 @@ $overrides = [ordered]@{
     'snd_volume_eff'   = '0'
     'snd_volume_music' = '0'
 }
+foreach ($key in $ConfigOverrides.Keys) { $overrides[$key] = $ConfigOverrides[$key] }
 $userConfig = [System.IO.File]::ReadAllLines((Join-Path $appData 'user.ltx'), $latin1)
 $smokeConfig = @($userConfig | Where-Object { $overrides.Keys -notcontains ($_ -split ' ', 2)[0] })
 $smokeConfig += $overrides.GetEnumerator() | ForEach-Object { "$($_.Key) $($_.Value)" }

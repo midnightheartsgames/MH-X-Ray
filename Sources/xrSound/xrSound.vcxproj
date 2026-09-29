@@ -65,7 +65,7 @@
       <AdditionalIncludeDirectories>
         $(SolutionDir)\Sources\Externals\DXSDK_Jun2010\Include\;
         $(SolutionDir)\Sources\Externals\EAX\Include\;
-        $(SolutionDir)\Sources\Externals\OpenAL32\;
+        $(SolutionDir)\Sources\Externals\OpenALSoft\include\AL\;
         $(SolutionDir)\Sources\Externals\Xiph\Sources\ogg\include\;
         $(SolutionDir)\Sources\Externals\Xiph\Sources\vorbis\include\;
         $(SolutionDir)\Sources\xrCore\
@@ -73,13 +73,18 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>
+        $(IntDir);
         $(SolutionDir)\Output\Libraries\;
-        $(SolutionDir)\Sources\Externals\EAX\Lib\;
         $(SolutionDir)\Sources\Externals\Xiph\Libraries\
       </AdditionalLibraryDirectories>
       <ImportLibrary>$(SolutionDir)\Output\Libraries\$(ProjectName).lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
+  <PropertyGroup Condition="'$(Platform)'=='Win32'">
+    <OpenALSoftDefinition>$(SolutionDir)\Sources\Externals\OpenALSoft\libs\Win32\OpenAL32.def</OpenALSoftDefinition>
+    <OpenALSoftMachine>x86</OpenALSoftMachine>
+    <OpenALSoftRuntime>$(SolutionDir)\Sources\Externals\OpenALSoft\bin\Win32\soft_oal.dll</OpenALSoftRuntime>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
@@ -161,12 +166,10 @@
     <ClInclude Include="SoundRender_Core.h" />
     <ClInclude Include="OpenALDeviceList.h" />
     <ClInclude Include="SoundRender_CoreA.h" />
-    <ClInclude Include="SoundRender_CoreD.h" />
     <ClInclude Include="SoundRender_Emitter.h" />
     <ClInclude Include="SoundRender_Source.h" />
     <ClInclude Include="SoundRender_Target.h" />
     <ClInclude Include="SoundRender_TargetA.h" />
-    <ClInclude Include="SoundRender_TargetD.h" />
     <ClInclude Include="SoundRender_Environment.h" />
     <ClInclude Include="MusicStream.h" />
     <ClInclude Include="xr_cda.h" />
@@ -194,7 +197,6 @@
     <ClCompile Include="SoundRender_Core_StartStop.cpp" />
     <ClCompile Include="OpenALDeviceList.cpp" />
     <ClCompile Include="SoundRender_CoreA.cpp" />
-    <ClCompile Include="SoundRender_CoreD.cpp" />
     <ClCompile Include="SoundRender_Emitter.cpp" />
     <ClCompile Include="SoundRender_Emitter_FSM.cpp" />
     <ClCompile Include="SoundRender_Emitter_StartStop.cpp" />
@@ -203,7 +205,6 @@
     <ClCompile Include="SoundRender_Source_loader.cpp" />
     <ClCompile Include="SoundRender_Target.cpp" />
     <ClCompile Include="SoundRender_TargetA.cpp" />
-    <ClCompile Include="SoundRender_TargetD.cpp" />
     <ClCompile Include="SoundRender_Environment.cpp" />
     <ClCompile Include="MusicStream.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -225,6 +226,12 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <Target Name="GenerateOpenALSoftImportLibrary" BeforeTargets="Link" Inputs="$(OpenALSoftDefinition)" Outputs="$(IntDir)OpenAL32.lib">
+    <Exec Command="lib /nologo /def:&quot;$(OpenALSoftDefinition)&quot; /machine:$(OpenALSoftMachine) /name:OpenAL32.dll /out:&quot;$(IntDir)OpenAL32.lib&quot;" />
+  </Target>
+  <Target Name="DeployOpenALSoft" AfterTargets="Build">
+    <Copy SourceFiles="$(OpenALSoftRuntime)" DestinationFiles="$(OutDir)OpenAL32.dll" SkipUnchangedFiles="true" />
+  </Target>
   <ProjectExtensions>
     <VisualStudio>
       <UserProperties DevPartner_IsInstrumented="1" />
