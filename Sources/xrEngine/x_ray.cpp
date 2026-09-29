@@ -885,6 +885,16 @@ class CSmokeTest
 	bool			m_finished;
 	CTimerBase		m_timer;
 	string64		m_save_name;
+	string64		m_jump_level;
+	bool			m_jumped;
+
+	static void		read_word_option(LPCSTR key, string64 &value)
+	{
+		value[0]					= 0;
+		LPCSTR		found			= strstr(Core.Params,key);
+		if (found)
+			sscanf					(found+xr_strlen(key),"%63[^ ]",value);
+	}
 
 	void			configure		()
 	{
@@ -898,10 +908,8 @@ class CSmokeTest
 		m_duration_ms				= u32(atoi(value+xr_strlen(key)))*1000;
 		m_menu_mode					= (0==strstr(Core.Params,"-start "));
 
-		LPCSTR		save_key		= "-smoke_save ";
-		LPCSTR		save_value		= strstr(Core.Params,save_key);
-		if (save_value)
-			sscanf					(save_value+xr_strlen(save_key),"%63[^ ]",m_save_name);
+		read_word_option			("-smoke_save ",m_save_name);
+		read_word_option			("-smoke_jump ",m_jump_level);
 	}
 
 	bool			menu_active		() const
@@ -909,7 +917,7 @@ class CSmokeTest
 		return		g_pGamePersistent && g_pGamePersistent->m_pMainMenu && g_pGamePersistent->m_pMainMenu->IsActive();
 	}
 public:
-					CSmokeTest		() : m_duration_ms(0), m_start_frame(0), m_inactive_frames(0), m_configured(false), m_enabled(false), m_menu_mode(false), m_armed(false), m_measuring(false), m_finished(false) { m_save_name[0] = 0; }
+					CSmokeTest		() : m_duration_ms(0), m_start_frame(0), m_inactive_frames(0), m_configured(false), m_enabled(false), m_menu_mode(false), m_armed(false), m_measuring(false), m_finished(false), m_jumped(false) { m_save_name[0] = 0; m_jump_level[0] = 0; }
 
 	void			arm				()
 	{
@@ -955,6 +963,13 @@ public:
 		u32			frames			= Device.dwFrame-m_start_frame;
 		Msg							("* smoke_test: %u frames in %u ms, %.1f fps, %u inactive frames",frames,elapsed_ms,float(frames)*1000.f/float(elapsed_ms),m_inactive_frames);
 		m_armed						= false;
+		if (m_jump_level[0] && !m_jumped) {
+			m_jumped				= true;
+			m_measuring				= false;
+			Console->Execute		(make_string("jump_to_level %s",m_jump_level).c_str());
+			return;
+		}
+
 		m_finished					= true;
 		if (m_save_name[0])
 			Console->Execute		(make_string("save %s",m_save_name).c_str());
